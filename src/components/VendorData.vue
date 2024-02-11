@@ -481,7 +481,6 @@ export default {
       this.deleteAlertModal = false;
     },
     downloadVendorData(vendorData) {
-        if (vendorData?.vendorName && vendorData?.partyDetail?.lastBillingDate) {
       const pdf = new jsPDF();
       let y = 20;
       pdf.setFontSize(20);
@@ -535,9 +534,6 @@ export default {
       }
 
       pdf.save(`${vendorData.vendorName}_${vendorData?.partyDetail?.lastBillingDate}.pdf`);
-        } else {
-            alert("Invalid vendor data for download")
-        }
     },
   },
 };
