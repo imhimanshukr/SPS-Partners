@@ -1,7 +1,20 @@
 <template>
   <v-container>
+    <v-text-field
+      placeholder="Search Vendor"
+      variant="solo-filled"
+      dense
+      flat
+      clearable
+      v-model="searchVendor"
+      v-if="vendorData?.length > 0"
+      class="search-vendor"
+    ></v-text-field>
     <v-expansion-panels v-if="vendorData?.length > 0" class="scroll-vendor">
-      <v-expansion-panel v-for="(vendor, index) in vendorData" :key="index">
+      <v-expansion-panel
+        v-for="(vendor, index) in filteredVendorData"
+        :key="index"
+      >
         <v-expansion-panel-title expand-icon="mdi-menu-down">
           <div class="d-flex justify-space-between align-center w-100">
             <p class="font-weight-medium text-uppercase">
@@ -375,11 +388,22 @@ export default {
     },
     selectedProductId: null,
     deleteProductAlertModal: false,
+    searchVendor: "",
   }),
   computed: {
     ...mapGetters(["getAllVendors"]),
     vendorData() {
       return this.getAllVendors;
+    },  
+    filteredVendorData() {
+      if (!this.searchVendor) {
+        return this.vendorData;
+      }
+
+      const lowerCaseSearch = this.searchVendor.toLowerCase();
+      return this.vendorData.filter((vendor) =>
+        vendor.vendorName.toLowerCase().includes(lowerCaseSearch)
+      );
     },
   },
   methods: {
@@ -533,7 +557,9 @@ export default {
         pdf.text("No product list available 😢", 10, y);
       }
 
-      pdf.save(`${vendorData.vendorName}_${vendorData?.partyDetail?.lastBillingDate}.pdf`);
+      pdf.save(
+        `${vendorData.vendorName}_${vendorData?.partyDetail?.lastBillingDate}.pdf`
+      );
     },
   },
 };
