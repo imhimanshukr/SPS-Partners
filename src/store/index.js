@@ -1,5 +1,8 @@
 import { createStore } from 'vuex';
+import { useToast } from 'vue-toastification'
 
+
+const toast = useToast()
 
 const updateLocalStorage = (data) => {
     localStorage.setItem('vendorData', JSON.stringify(data));
@@ -9,7 +12,6 @@ const updateLocalStorage = (data) => {
     const data = localStorage.getItem('vendorData');
     return data ? JSON.parse(data) : [];
   };
-
 
 export default createStore({
   state: {
@@ -36,16 +38,37 @@ export default createStore({
             },
             productList: []
         })
-        updateLocalStorage(state.vendorData);  
+        updateLocalStorage(state.vendorData); 
+        toast.success("Vendor Added! 😊") 
+    },
+    copyVendor(state, vendorData) {
+      state.vendorData.push(
+        {
+            vendorName: vendorData.vendorName,
+            vendorId: new Date().getTime(),
+            partyDetail: vendorData.partyDetail,
+            productList: vendorData.productList.map((data) => ({
+              order: "",
+              stock: "",
+              purchangeRate: "",
+              productId: Math.random().toString(36).substr(2, 9),
+              productName: data.productName,
+              productUnit: data.productUnit
+          }))
+        })
+        updateLocalStorage(state.vendorData);
+        toast.success("Vendor Copied! 😊") 
     },
     editVendor(state, payload){
         const vendor = state.vendorData.find(vendor => vendor.vendorId === payload.vendorId);
         vendor.vendorName = payload.vendorName;
         updateLocalStorage(state.vendorData);
+        toast.success("Vendor Updated! 😊") 
     },
     deleteVendor(state, vendorId){
         state.vendorData = state.vendorData.filter(vendor => vendor.vendorId !== vendorId);
         updateLocalStorage(state.vendorData);
+        toast.error("Vendor Deleted! 😞") 
     },
     addPartyDetail(state, { vendorId, partyDetail }) {
         const vendor = state.vendorData.find(vendor => vendor.vendorId === vendorId);
@@ -56,6 +79,7 @@ export default createStore({
             vendor.partyDetail.lastBillingDate= partyDetail.lastBillingDate;
         }
         updateLocalStorage(state.vendorData);
+        toast.success("Party Details Added! 😊") 
     },
     addNewProduct(state, {vendorId, productDetail}){
         console.log({vendorId, productDetail});
@@ -66,8 +90,10 @@ export default createStore({
             stock: productDetail.stock,
             order: productDetail.order,
             productUnit: productDetail.productUnit,
+            purchangeRate: productDetail.purchangeRate,
         })
         updateLocalStorage(state.vendorData);
+        toast.success("New Product Added! 😊") 
     },
     editProductDetail(state, { vendorId, productDetail }) {
         const vendor = state.vendorData.find(vendor => vendor.vendorId === vendorId);
@@ -80,9 +106,11 @@ export default createStore({
                 product.stock= productDetail.stock;
                 product.order= productDetail.order;
                 product.productUnit= productDetail.productUnit;
+                product.purchangeRate= productDetail.purchangeRate;
             }
         }
         updateLocalStorage(state.vendorData);
+        toast.success("Product Updated! 😊") 
     },
     deleteProduct(state, payload){
         const vendor = state.vendorData.find(vendor => vendor.vendorId === payload.vendorId);
@@ -90,6 +118,7 @@ export default createStore({
             vendor.productList = vendor.productList.filter(product => product.productId !== payload.productId);
         }
         updateLocalStorage(state.vendorData);
+        toast.error("Product Deleted! 😞") 
     }
   },
   actions: {
@@ -101,6 +130,9 @@ export default createStore({
     },
     addVendor({ commit }, vendorName) {
       commit('addVendor', vendorName);
+    },
+    copyVendor({ commit }, vendorData) {
+      commit('copyVendor', vendorData);
     },
     editVendor({ commit }, payload) {
       commit('editVendor', payload);
@@ -122,6 +154,16 @@ export default createStore({
     }
   },
   getters: {
+    productNames: state => {
+      const uniqueProductNames = Array.from(
+          new Set(
+              state.vendorData.flatMap(vendor => 
+                  vendor.productList.map(product => product.productName)
+              )
+          )
+      );
+      return uniqueProductNames;
+  },
     getAllVendors: state => state.vendorData
   }
 });

@@ -20,8 +20,17 @@
             <p class="font-weight-medium text-uppercase">
               {{ vendor.vendorName }}
             </p>
-            <div>
-              <v-icon color="blue" @click="downloadVendorData(vendor)"
+            <div style="min-width: 120px">
+              <v-icon
+                @click="copyVendorData(vendor)"
+                color="blue-grey-lighten-1"
+                class="mr-2"
+                >mdi-content-copy</v-icon
+              >
+              <!-- <v-icon @click="share(vendor)" color="deep-purple-lighten-1" class="mx-2">mdi-share</v-icon> -->
+              <v-icon
+                color="light-green-darken-4"
+                @click="downloadVendorData(vendor)"
                 >mdi-download</v-icon
               >
               <v-icon
@@ -111,39 +120,53 @@
             >
           </v-flex>
 
-  <v-table v-if="vendor.productList.length > 0">
-    <thead>
-      <tr>
-        <th class="text-left" style="width: 50px">S.No</th>
-        <th class="text-left">Product</th>
-        <th class="text-left">Stock</th>
-        <th class="text-left">Order</th>
-        <th class="text-left">Action</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr v-for="(product, index) in vendor.productList" :key="index">
-        <td style="width: 50px">{{ index + 1 }}</td>
-        <td>{{ product.productName }}</td>
-        <td>{{ product.stock }} {{product.productUnit}}</td>
-        <td>{{ product.order }} {{product.productUnit}}</td>
-        <td class="d-flex align-center">
-          <v-icon
-            class="ml-2 cursor-pointer"
-            color="blue-darken-2"
-            @click="openProductDetail(product, vendor.vendorId)"
-            >mdi-pencil</v-icon
-          >
-          <v-icon
-            class="ml-2 cursor-pointer"
-            color="red-darken-2"
-            @click="openDeleteProductModel(vendor.vendorId, product.productId)"
-            >mdi-delete</v-icon
-          >
-        </td>
-      </tr>
-    </tbody>
-  </v-table>          <p class="text-center w-100 mt-3 text-grey" v-else>
+          <v-table v-if="vendor.productList.length > 0">
+            <thead>
+              <tr>
+                <th class="text-left" style="width: 50px">S.No</th>
+                <th class="text-left">Product</th>
+                <th class="text-left">Purchange Rate</th>
+                <th class="text-left">Stock</th>
+                <th class="text-left">Order</th>
+                <th class="text-left">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="(product, index) in vendor.productList" :key="index">
+                <td style="width: 50px">{{ index + 1 }}</td>
+                <td>{{ product.productName }}</td>
+                <td>
+                  {{ product.purchangeRate }}
+                  {{ product.purchangeRate ? product.productUnit : "N/A" }}
+                </td>
+                <td>
+                  {{ product.stock }}
+                  {{ product.stock ? product.productUnit : "N/A" }}
+                </td>
+                <td>
+                  {{ product.order }}
+                  {{ product.order ? product.productUnit : "N/A" }}
+                </td>
+                <td class="d-flex align-center">
+                  <v-icon
+                    class="ml-2 cursor-pointer"
+                    color="blue-darken-2"
+                    @click="openProductDetail(product, vendor.vendorId)"
+                    >mdi-pencil</v-icon
+                  >
+                  <v-icon
+                    class="ml-2 cursor-pointer"
+                    color="red-darken-2"
+                    @click="
+                      openDeleteProductModel(vendor.vendorId, product.productId)
+                    "
+                    >mdi-delete</v-icon
+                  >
+                </td>
+              </tr>
+            </tbody>
+          </v-table>
+          <p class="text-center w-100 mt-3 text-grey" v-else>
             No product list available 😢
           </p>
           <v-btn
@@ -180,7 +203,6 @@
               label="Party Name"
               required
               variant="solo"
-              :rules="[(v) => !!v || 'Party Name is required']"
             ></v-text-field>
             <v-text-field
               v-model="addParty.partyNumber"
@@ -188,14 +210,12 @@
               type="number"
               required
               variant="solo"
-              :rules="[(v) => !!v || 'Party Number is required']"
             ></v-text-field>
             <v-text-field
               v-model="addParty.partyAddress"
               label="Party Address"
               required
               variant="solo"
-              :rules="[(v) => !!v || 'Party Address is required']"
             ></v-text-field>
             <v-text-field
               v-model="addParty.lastBillingDate"
@@ -204,7 +224,6 @@
               type="date"
               variant="solo"
               format="DD-MM-YYY"
-              :rules="[(v) => !!v || 'Last Billling Date is required']"
             ></v-text-field>
             <v-btn type="submit" color="primary">Save</v-btn>
             <v-btn @click="closePartyForm" class="ml-2">Close</v-btn>
@@ -220,33 +239,38 @@
         <v-card-text>
           <v-form ref="addProductForm" @submit.prevent="addNewProductList">
             <v-text-field
-              v-model="newProductDetail.productName"
               label="Product Name"
+              v-model="newProductDetail.productName"
+              variant="solo"
+            ></v-text-field>
+            <v-text-field
+              v-model="newProductDetail.purchangeRate"
+              label="Purchnage Rate"
+              type="number"
+              variant="solo"
               required
-              :rules="[(v) => !!v || 'Product Name is required']"
             ></v-text-field>
             <v-text-field
               v-model="newProductDetail.stock"
               label="Stock"
               type="number"
+              variant="solo"
               required
-              :rules="[
-                (v) => !!v || 'Stock is required',
-                (v) => v >= 0 || 'Stock must be a non-negative number',
-              ]"
             ></v-text-field>
             <v-text-field
               v-model="newProductDetail.order"
               label="Order"
               type="number"
-              required
-              :rules="[(v) => !!v || 'Order is required']"
+              variant="solo"
             ></v-text-field>
-            <v-radio-group label="Select Unit" v-model="newProductDetail.productUnit">
+            <v-radio-group
+              label="Select Unit"
+              v-model="newProductDetail.productUnit"
+            >
               <div class="d-flex">
-              <v-radio label="Kg" value="Kg" color="green"></v-radio>
-              <v-radio label="Piece" value="PC" color="green"></v-radio>
-              <v-radio label="Case" value="Case" color="green"></v-radio>
+                <v-radio label="Kg" value="Kg" color="green"></v-radio>
+                <v-radio label="Piece" value="PC" color="green"></v-radio>
+                <v-radio label="Case" value="Case" color="green"></v-radio>
               </div>
             </v-radio-group>
             <v-btn type="submit" color="primary">Save</v-btn>
@@ -263,28 +287,41 @@
         <v-card-text>
           <v-form ref="editProductForm" @submit.prevent="editProductDetail">
             <v-text-field
-              v-model="editedProduct.productName"
               label="Product Name"
-              required
-              :rules="[(v) => !!v || 'Product Name is required']"
+              v-model="editedProduct.productName"
+              variant="solo"
             ></v-text-field>
+
+            <v-text-field
+              v-model="editedProduct.purchangeRate"
+              label="Purchnage Rate"
+              type="number"
+              variant="solo"
+            ></v-text-field>
+
             <v-text-field
               v-model="editedProduct.stock"
               label="Stock"
               type="number"
-              required
-              :rules="[
-                (v) => !!v || 'Stock is required',
-                (v) => v >= 0 || 'Stock must be a non-negative number',
-              ]"
+              variant="solo"
             ></v-text-field>
             <v-text-field
               v-model="editedProduct.order"
               label="Order"
               type="number"
-              required
-              :rules="[(v) => !!v || 'Order is required']"
+              variant="solo"
             ></v-text-field>
+            <v-radio-group
+              label="Select Unit"
+              v-model="editedProduct.productUnit"
+            >
+              <div class="d-flex">
+                <v-radio label="Kg" value="Kg" color="green"></v-radio>
+                <v-radio label="Piece" value="PC" color="green"></v-radio>
+                <v-radio label="Case" value="Case" color="green"></v-radio>
+              </div>
+            </v-radio-group>
+
             <v-btn type="submit" color="primary" class="mr-2">Edit</v-btn>
             <v-btn @click="closeEditProductForm">Close</v-btn>
           </v-form>
@@ -335,6 +372,7 @@
             <v-text-field
               v-model="editedVendorName"
               label="Vendor Name"
+              variant="solo"
               :rules="[(v) => !!v || 'Vendor name is required']"
             ></v-text-field>
 
@@ -361,6 +399,7 @@
 import { mapGetters } from "vuex";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
+import logo from "../assets/logo.png";
 
 export default {
   data: () => ({
@@ -382,6 +421,7 @@ export default {
       productName: "",
       stock: "",
       order: "",
+      purchangeRate: "",
       productUnit: null,
     },
     editProductFormModal: false,
@@ -390,25 +430,46 @@ export default {
       productName: "",
       stock: "",
       order: "",
+      purchangeRate: "",
+      productUnit: null,
     },
     selectedProductId: null,
     deleteProductAlertModal: false,
     searchVendor: "",
   }),
   computed: {
-    ...mapGetters(["getAllVendors"]),
+    ...mapGetters(["getAllVendors", "productNames"]),
     vendorData() {
       return this.getAllVendors;
     },
+    productNameList() {
+      return this.productNames;
+    },
     filteredVendorData() {
+      let vendorData;
       if (!this.searchVendor) {
-        return this.vendorData;
+        vendorData = this.vendorData.sort(
+          (a, b) => a.vendorName - b.vendorName
+        );
+      } else {
+        const lowerCaseSearch = this.searchVendor.toLowerCase();
+        vendorData = this.vendorData.filter((vendor) =>
+          vendor.vendorName.toLowerCase().includes(lowerCaseSearch)
+        );
       }
+      vendorData.sort((a, b) => {
+        const vendorNameA = a.vendorName.toUpperCase();
+        const vendorNameB = b.vendorName.toUpperCase();
 
-      const lowerCaseSearch = this.searchVendor.toLowerCase();
-      return this.vendorData.filter((vendor) =>
-        vendor.vendorName.toLowerCase().includes(lowerCaseSearch)
-      );
+        if (vendorNameA < vendorNameB) {
+          return -1;
+        }
+        if (vendorNameA > vendorNameB) {
+          return 1;
+        }
+        return 0;
+      });
+      return vendorData;
     },
   },
   methods: {
@@ -423,13 +484,13 @@ export default {
         (this.addPartyModal = true);
     },
     addPartyDetail() {
-      if (this.$refs.addPartyForm.validate()) {
-        this.$store.dispatch("addPartyDetail", {
-          vendorId: this.selectedVendorId,
-          partyDetail: this.addParty,
-        });
-        this.closePartyForm();
-      }
+      // if (this.$refs.addPartyForm.validate()) {
+      this.$store.dispatch("addPartyDetail", {
+        vendorId: this.selectedVendorId,
+        partyDetail: this.addParty,
+      });
+      this.closePartyForm();
+      // }
     },
     closePartyForm() {
       this.addPartyModal = false;
@@ -441,14 +502,14 @@ export default {
     },
 
     addNewProductList() {
-      if (this.$refs.addProductForm.validate()) {
-        this.newProductDetail.productId = new Date().getTime();
-        this.$store.dispatch("addNewProduct", {
-          vendorId: this.selectedVendorId,
-          productDetail: this.newProductDetail,
-        });
-        this.closeProductForm();
-      }
+      // if (this.$refs.addProductForm.validate()) {
+      this.newProductDetail.productId = new Date().getTime();
+      this.$store.dispatch("addNewProduct", {
+        vendorId: this.selectedVendorId,
+        productDetail: this.newProductDetail,
+      });
+      this.closeProductForm();
+      // }
     },
     closeProductForm() {
       this.addNewProductModal = false;
@@ -463,18 +524,20 @@ export default {
         productName: product.productName,
         stock: product.stock,
         order: product.order,
+        purchangeRate: product.purchangeRate,
+        productUnit: product.productUnit,
       };
       this.editProductFormModal = true;
     },
     editProductDetail() {
-      if (this.$refs.editProductForm.validate()) {
-        console.log("Save Edit:", this.editedProduct);
-        this.$store.dispatch("editProductDetail", {
-          vendorId: this.selectedVendorId,
-          productDetail: this.editedProduct,
-        });
-        this.closeEditProductForm();
-      }
+      // if (this.$refs.editProductForm.validate()) {
+      // console.log("Save Edit:", this.editedProduct);
+      this.$store.dispatch("editProductDetail", {
+        vendorId: this.selectedVendorId,
+        productDetail: this.editedProduct,
+      });
+      this.closeEditProductForm();
+      // }
     },
     closeEditProductForm() {
       this.$refs.editProductForm.reset();
@@ -512,6 +575,10 @@ export default {
     downloadVendorData(vendorData) {
       const pdf = new jsPDF();
       let y = 20;
+
+      const logoImg = new Image();
+      logoImg.src = logo;
+      pdf.addImage(logoImg, 'PNG', 0, 0, 30, 30);
       pdf.setFontSize(20);
       pdf.setTextColor(40);
       const vendorName =
@@ -566,14 +633,79 @@ export default {
         `${vendorData.vendorName}_${vendorData?.partyDetail?.lastBillingDate}.pdf`
       );
     },
+    copyVendorData(vendorData) {
+      this.$store.dispatch("copyVendor", vendorData);
+    },
+    // share(vendorData) {
+    //       const pdf = new jsPDF();
+    //       let y = 20;
+    //       pdf.setFontSize(20);
+    //       pdf.setTextColor(40);
+    //       const vendorName =
+    //         vendorData.vendorName.toUpperCase() || "No Vendor Name";
+    //       const textWidth =
+    //         (pdf.getStringUnitWidth(vendorName) * pdf.internal.getFontSize()) /
+    //         pdf.internal.scaleFactor;
+    //       const x = (pdf.internal.pageSize.width - textWidth) / 2;
+    //       pdf.text(vendorName, x, y);
+    //       y += 10;
+
+    //       pdf.setFontSize(12);
+    //       const partyDetails = [
+    //         {
+    //           label: "Party Name:",
+    //           value: vendorData.partyDetail.partyName || "No Party Name",
+    //         },
+    //         {
+    //           label: "Party Number:",
+    //           value: vendorData.partyDetail.partyNumber || "No Party Number",
+    //         },
+    //         {
+    //           label: "Party Address:",
+    //           value: vendorData.partyDetail.partyAddress || "No Party Address",
+    //         },
+    //         {
+    //           label: "Last Billing Date:",
+    //           value:
+    //             vendorData.partyDetail.lastBillingDate || "No Last Billing Date",
+    //         },
+    //       ];
+    //       partyDetails.forEach((detail) => {
+    //         pdf.text(`${detail.label} ${detail.value}`, 10, y);
+    //         y += 5;
+    //       });
+
+    //       const productList = vendorData.productList;
+    //       if (productList.length > 0) {
+    //         const columns = ["S.No", "Product Name", "Stock", "Order"];
+    //         const rows = productList.map((product, index) => [
+    //           index + 1,
+    //           product.productName,
+    //           product.stock + " " + product.productUnit,
+    //           product.order + " " + product.productUnit,
+    //         ]);
+    //         pdf.autoTable({ startY: y, head: [columns], body: rows });
+    //       } else {
+    //         pdf.text("No product list available 😢", 10, y);
+    //       }
+
+    //       const blobURL = pdf.output("blob");
+    // download(blobURL, "vendorData.pdf", "application/pdf");
+    //       // const blobURL = URL.createObjectURL(pdf.output('blob'));
+    //       // const whatsappLink = `https://api.whatsapp.com/send?text=Check out this PDF: ${blobURL}`;
+    //       // window.open(whatsappLink, '_blank');
+    //       const message = "Check out this PDF";
+    //       const whatsappURL = `whatsapp://send?text=${encodeURIComponent(message)}`;
+    //       window.open(whatsappURL);
+    //     },
     formatDate(value) {
-      if (!value) return '';
+      if (!value) return "";
       const date = new Date(value);
-      const day = String(date.getDate()).padStart(2, '0');
-      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, "0");
+      const month = String(date.getMonth() + 1).padStart(2, "0");
       const year = date.getFullYear();
       return `${day}-${month}-${year}`;
-    }
+    },
   },
 };
 </script>
@@ -586,7 +718,8 @@ export default {
 .v-expansion-panel-title {
   padding: 16px 10px !important;
 }
-  th, td {
-    white-space: nowrap;
-  }
+th,
+td {
+  white-space: nowrap;
+}
 </style>

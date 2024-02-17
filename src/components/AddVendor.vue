@@ -10,6 +10,7 @@
             <v-text-field
               v-model="vendorName"
               label="Vendor Name"
+              variant="solo"
               :rules="[
                 v => !!v || 'Vendor name is required',
               ]"
