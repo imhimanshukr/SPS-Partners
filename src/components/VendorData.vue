@@ -554,8 +554,8 @@ export default {
         const rows = productList.map((product, index) => [
           index + 1,
           product.productName,
-          product.stock,
-          product.order,
+          product.stock + " " + product.productUnit,
+          product.order + " " + product.productUnit,
         ]);
         pdf.autoTable({ startY: y, head: [columns], body: rows });
       } else {
