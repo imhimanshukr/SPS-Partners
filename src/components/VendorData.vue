@@ -111,42 +111,39 @@
             >
           </v-flex>
 
-          <v-table v-if="vendor.productList.length > 0">
-            <thead>
-              <tr>
-                <th class="text-left">S.No</th>
-                <th class="text-left">Product</th>
-                <th class="text-left">Stock</th>
-                <th class="text-left">Order</th>
-                <th class="text-left">Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="(product, index) in vendor.productList" :key="index">
-                <td>{{ index + 1 }}</td>
-                <td style="width: 60px">{{ product.productName }}</td>
-                <td>{{ product.stock }} {{product.productUnit}}</td>
-                <td>{{ product.order }} {{product.productUnit}}</td>
-                <td class="d-flex align-center">
-                  <v-icon
-                    class="ml-2 cursor-pointer"
-                    color="blue-darken-2"
-                    @click="openProductDetail(product, vendor.vendorId)"
-                    >mdi-pencil</v-icon
-                  >
-                  <v-icon
-                    class="ml-2 cursor-pointer"
-                    color="red-darken-2"
-                    @click="
-                      openDeleteProductModel(vendor.vendorId, product.productId)
-                    "
-                    >mdi-delete</v-icon
-                  >
-                </td>
-              </tr>
-            </tbody>
-          </v-table>
-          <p class="text-center w-100 mt-3 text-grey" v-else>
+  <v-table v-if="vendor.productList.length > 0">
+    <thead>
+      <tr>
+        <th class="text-left" style="width: 50px">S.No</th>
+        <th class="text-left">Product</th>
+        <th class="text-left">Stock</th>
+        <th class="text-left">Order</th>
+        <th class="text-left">Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr v-for="(product, index) in vendor.productList" :key="index">
+        <td style="width: 50px">{{ index + 1 }}</td>
+        <td>{{ product.productName }}</td>
+        <td>{{ product.stock }} {{product.productUnit}}</td>
+        <td>{{ product.order }} {{product.productUnit}}</td>
+        <td class="d-flex align-center">
+          <v-icon
+            class="ml-2 cursor-pointer"
+            color="blue-darken-2"
+            @click="openProductDetail(product, vendor.vendorId)"
+            >mdi-pencil</v-icon
+          >
+          <v-icon
+            class="ml-2 cursor-pointer"
+            color="red-darken-2"
+            @click="openDeleteProductModel(vendor.vendorId, product.productId)"
+            >mdi-delete</v-icon
+          >
+        </td>
+      </tr>
+    </tbody>
+  </v-table>          <p class="text-center w-100 mt-3 text-grey" v-else>
             No product list available 😢
           </p>
           <v-btn
@@ -581,4 +578,7 @@ export default {
 .v-expansion-panel-title {
   padding: 16px 10px !important;
 }
+  th, td {
+    white-space: nowrap;
+  }
 </style>
