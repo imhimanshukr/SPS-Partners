@@ -68,18 +68,21 @@
                   : "No Party name"
               }}
             </v-chip>
-            <v-chip
-              size="x-small"
-              variant="flat"
-              color="grey"
-              class="ma-1 font-italic"
-            >
-              {{
-                vendor.partyDetail.partyNumber
-                  ? vendor.partyDetail.partyNumber
-                  : "No Party Number"
-              }}
-            </v-chip>
+<a :href="'tel:' + (vendor.partyDetail.partyNumber ? vendor.partyDetail.partyNumber : '')">
+  <v-chip
+    size="x-small"
+    variant="flat"
+    color="grey"
+    class="ma-1 font-italic"
+    @click.stop
+  >
+    {{
+      vendor.partyDetail.partyNumber
+        ? vendor.partyDetail.partyNumber
+        : "No Party Number"
+    }}
+  </v-chip>
+</a>
             <v-chip
               size="x-small"
               variant="flat"
@@ -210,6 +213,7 @@
               type="number"
               required
               variant="solo"
+              :maxlength="10"
             ></v-text-field>
             <v-text-field
               v-model="addParty.partyAddress"
