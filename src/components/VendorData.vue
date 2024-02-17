@@ -91,7 +91,7 @@
             >
               {{
                 vendor.partyDetail.lastBillingDate
-                  ? vendor.partyDetail.lastBillingDate
+                  ? this.formatDate(vendor.partyDetail.lastBillingDate)
                   : "No Last Billing Date"
               }}
             </v-chip>
@@ -425,7 +425,6 @@ export default {
     },
     addPartyDetail() {
       if (this.$refs.addPartyForm.validate()) {
-        this.addParty.lastBillingDate = moment(this.addParty.lastBillingDate).format('DD-MM-YYYY');
         this.$store.dispatch("addPartyDetail", {
           vendorId: this.selectedVendorId,
           partyDetail: this.addParty,
@@ -568,6 +567,14 @@ export default {
         `${vendorData.vendorName}_${vendorData?.partyDetail?.lastBillingDate}.pdf`
       );
     },
+    formatDate(value) {
+      if (!value) return '';
+      const date = new Date(value);
+      const day = String(date.getDate()).padStart(2, '0');
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const year = date.getFullYear();
+      return `${day}-${month}-${year}`;
+    }
   },
 };
 </script>
