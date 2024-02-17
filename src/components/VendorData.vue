@@ -125,8 +125,8 @@
               <tr v-for="(product, index) in vendor.productList" :key="index">
                 <td>{{ index + 1 }}</td>
                 <td style="width: 60px">{{ product.productName }}</td>
-                <td>{{ product.stock }}</td>
-                <td>{{ product.order }}</td>
+                <td>{{ product.stock }} {{product.productUnit}}</td>
+                <td>{{ product.order }} {{product.productUnit}}</td>
                 <td class="d-flex align-center">
                   <v-icon
                     class="ml-2 cursor-pointer"
@@ -245,6 +245,13 @@
               required
               :rules="[(v) => !!v || 'Order is required']"
             ></v-text-field>
+            <v-radio-group label="Select Unit" v-model="newProductDetail.productUnit">
+              <div class="d-flex">
+              <v-radio label="Kg" value="Kg" color="green"></v-radio>
+              <v-radio label="Piece" value="PC" color="green"></v-radio>
+              <v-radio label="Case" value="Case" color="green"></v-radio>
+              </div>
+            </v-radio-group>
             <v-btn type="submit" color="primary">Save</v-btn>
             <v-btn @click="closeProductForm" class="ml-2">Close</v-btn>
           </v-form>
@@ -378,6 +385,7 @@ export default {
       productName: "",
       stock: "",
       order: "",
+      productUnit: null,
     },
     editProductFormModal: false,
     editedProduct: {
@@ -394,7 +402,7 @@ export default {
     ...mapGetters(["getAllVendors"]),
     vendorData() {
       return this.getAllVendors;
-    },  
+    },
     filteredVendorData() {
       if (!this.searchVendor) {
         return this.vendorData;

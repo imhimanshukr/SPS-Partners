@@ -65,6 +65,7 @@ export default createStore({
             productName: productDetail.productName,
             stock: productDetail.stock,
             order: productDetail.order,
+            productUnit: productDetail.productUnit,
         })
         updateLocalStorage(state.vendorData);
     },
@@ -78,6 +79,7 @@ export default createStore({
                 product.productName= productDetail.productName;
                 product.stock= productDetail.stock;
                 product.order= productDetail.order;
+                product.productUnit= productDetail.productUnit;
             }
         }
         updateLocalStorage(state.vendorData);
