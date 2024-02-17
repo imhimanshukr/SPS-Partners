@@ -361,7 +361,6 @@
 import { mapGetters } from "vuex";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
-import moment from 'moment';
 
 export default {
   data: () => ({
