@@ -361,6 +361,7 @@
 import { mapGetters } from "vuex";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
+import moment from 'moment';
 
 export default {
   data: () => ({
@@ -424,6 +425,7 @@ export default {
     },
     addPartyDetail() {
       if (this.$refs.addPartyForm.validate()) {
+        this.addParty.lastBillingDate = moment(this.addParty.lastBillingDate).format('DD-MM-YYYY');
         this.$store.dispatch("addPartyDetail", {
           vendorId: this.selectedVendorId,
           partyDetail: this.addParty,
