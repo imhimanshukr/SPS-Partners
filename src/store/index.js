@@ -17,6 +17,7 @@ export default createStore({
   state: {
     addVendorModel: false,
     vendorData: getLocalStorage(),
+    productName: [],
   },
   mutations: {
     openAddVendorModal(state) {
@@ -119,6 +120,10 @@ export default createStore({
         }
         updateLocalStorage(state.vendorData);
         toast.error("Product Deleted! 😞") 
+    },
+    addProductName(state, productName){
+      state.productName.push(productName)
+      toast.success("Product Added! 😊") 
     }
   },
   actions: {
@@ -151,6 +156,9 @@ export default createStore({
     },
     deleteProduct({ commit }, payload) {
         commit('deleteProduct', payload);
+    },
+    addProductName({ commit }, payload) {
+        commit('addProductName', payload);
     }
   },
   getters: {
@@ -162,7 +170,9 @@ export default createStore({
               )
           )
       );
-      return uniqueProductNames;
+      const newProductName = Array.from(new Set(state.productName));
+      console.log("newProductName: ", newProductName);
+      return uniqueProductNames.concat(newProductName);
   },
     getAllVendors: state => state.vendorData
   }

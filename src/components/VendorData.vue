@@ -1,5 +1,5 @@
 <template>
-  <v-container>
+  <v-container style="position: relative;">
     <v-text-field
       placeholder="Search Vendor"
       variant="solo-filled"
@@ -18,7 +18,8 @@
         <v-expansion-panel-title expand-icon="mdi-menu-down">
           <div class="d-flex justify-space-between align-center w-100">
             <p class="font-weight-medium text-uppercase">
-              {{ vendor.vendorName }}
+              {{ vendor.vendorName }}<br>
+              <i style="font-size: 10px;">{{vendor.partyDetail.lastBillingDate}}</i>
             </p>
             <div style="min-width: 120px">
               <v-icon
@@ -136,8 +137,8 @@
             </thead>
             <tbody>
               <tr v-for="(product, index) in vendor.productList" :key="index">
-                <td style="width: 50px">{{ index + 1 }}</td>
-                <td>{{ product.productName }}</td>
+                <td style="width: 30px">{{ index + 1 }}</td>
+                <td style="text-transform: capitalize;">{{ product.productName }}</td>
                 <td>
                   {{ product.purchangeRate }}
                   {{ product.purchangeRate ? product.productUnit : "N/A" }}
@@ -242,11 +243,12 @@
         <v-card-title>Add Product</v-card-title>
         <v-card-text>
           <v-form ref="addProductForm" @submit.prevent="addNewProductList">
-            <v-text-field
+            <v-autocomplete
               label="Product Name"
               v-model="newProductDetail.productName"
               variant="solo"
-            ></v-text-field>
+              :items="$store.getters.productNames"
+            ></v-autocomplete>
             <v-text-field
               v-model="newProductDetail.purchangeRate"
               label="Purchnage Rate"
@@ -290,11 +292,12 @@
         <v-card-title>Edit Product</v-card-title>
         <v-card-text>
           <v-form ref="editProductForm" @submit.prevent="editProductDetail">
-            <v-text-field
+            <v-autocomplete
               label="Product Name"
               v-model="editedProduct.productName"
               variant="solo"
-            ></v-text-field>
+              :items="$store.getters.productNames"
+            ></v-autocomplete>
 
             <v-text-field
               v-model="editedProduct.purchangeRate"
@@ -396,6 +399,39 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+
+    <!-- Add Product Name -->
+    <v-dialog v-model="showAddProdModel" max-width="600">
+      <v-card>
+        <!-- <v-card-title class="headline">Add Vendor</v-card-title> -->
+
+        <v-card-text>
+          <v-form @submit.prevent="addProductName">
+
+            <v-text-field
+              v-model="productName"
+              label="Enter New Product"
+              variant="solo"
+              :rules="[
+                v => !!v || 'Product name is required',
+              ]"
+            ></v-text-field>
+
+            <v-btn type="submit" color="primary" class="w-100">Add Product</v-btn>
+          </v-form>
+        </v-card-text>
+
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn @click="showAddProdModel = false; productName = ''" color="blue darken-1" text>
+            Close
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+
+    <v-icon color="white" class="add-product-name" @click="showAddProdModel = true;">mdi-plus</v-icon>
   </v-container>
 </template>
 
@@ -440,6 +476,8 @@ export default {
     selectedProductId: null,
     deleteProductAlertModal: false,
     searchVendor: "",
+    showAddProdModel: false,
+    productName: ""
   }),
   computed: {
     ...mapGetters(["getAllVendors", "productNames"]),
@@ -593,7 +631,7 @@ export default {
       const x = (pdf.internal.pageSize.width - textWidth) / 2;
       pdf.text(vendorName, x, y);
       y += 10;
-
+      const lastBillingDate = this.formatDate(vendorData.partyDetail.lastBillingDate);
       pdf.setFontSize(12);
       const partyDetails = [
         {
@@ -611,7 +649,7 @@ export default {
         {
           label: "Last Billing Date:",
           value:
-            vendorData.partyDetail.lastBillingDate || "No Last Billing Date",
+            lastBillingDate || "No Last Billing Date",
         },
       ];
       partyDetails.forEach((detail) => {
@@ -621,12 +659,13 @@ export default {
 
       const productList = vendorData.productList;
       if (productList.length > 0) {
-        const columns = ["S.No", "Product Name", "Stock", "Order"];
+        const columns = ["S.No", "Purchange Rate", "Product Name", "Stock", "Order"];
         const rows = productList.map((product, index) => [
           index + 1,
           product.productName,
-          product.stock + " " + product.productUnit,
-          product.order + " " + product.productUnit,
+          product.purchangeRate ? product.purchangeRate + " " + product.productUnit : "N/A",
+          product.stock ? product.stock + " " + product.productUnit : "N/A",
+          product.order ? product.order + " " + product.productUnit : "N/A",
         ]);
         pdf.autoTable({ startY: y, head: [columns], body: rows });
       } else {
@@ -710,20 +749,36 @@ export default {
       const year = date.getFullYear();
       return `${day}-${month}-${year}`;
     },
+    addProductName(){
+      if(this.productName){
+        this.$store.dispatch('addProductName', this.productName);
+      this.showAddProdModel = false;
+      }
+    }
   },
 };
 </script>
 
 <style scoped>
 .scroll-vendor {
-  max-height: 80vh;
-  overflow-y: scroll;
-}
+    max-height: 60vh;
+    overflow-y: scroll;
+    margin-bottom: 30px;
+    }
 .v-expansion-panel-title {
   padding: 16px 10px !important;
 }
 th,
 td {
   white-space: nowrap;
+}
+.add-product-name {
+      position: absolute;
+    bottom: 12%;
+    right: 5%;
+    background: green;
+    border-radius: 30px;
+    padding: 15px;
+    z-index: 1;
 }
 </style>
