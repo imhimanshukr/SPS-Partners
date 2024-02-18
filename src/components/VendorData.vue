@@ -431,7 +431,7 @@
     </v-dialog>
 
 
-    <v-icon color="white" class="add-product-name" @click="showAddProdModel = true;">mdi-plus</v-icon>
+    <v-icon color="white" class="add-product-name" @click="showAddProdModel = true;" v-if="filteredVendorData.length > 0">mdi-plus</v-icon>
   </v-container>
 </template>
 
