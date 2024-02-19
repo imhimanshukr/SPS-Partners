@@ -19,8 +19,8 @@
           <div class="d-flex justify-space-between align-center w-100">
             <p class="font-weight-medium text-uppercase">
               {{ vendor.vendorName }}<br />
-              <i style="font-size: 10px">{{
-                vendor.partyDetail.lastBillingDate
+              <i style="font-size: 10px; color: gray;">{{
+                formatDate(vendor.partyDetail.lastBillingDate)
               }}</i>
             </p>
             <div style="min-width: 120px">
