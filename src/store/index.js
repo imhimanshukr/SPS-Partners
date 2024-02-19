@@ -51,7 +51,7 @@ export default createStore({
             productList: vendorData.productList.map((data) => ({
               order: "",
               stock: "",
-              purchangeRate: "",
+              purchaseRate: "",
               productId: Math.random().toString(36).substr(2, 9),
               productName: data.productName,
               productUnit: data.productUnit
@@ -91,7 +91,7 @@ export default createStore({
             stock: productDetail.stock,
             order: productDetail.order,
             productUnit: productDetail.productUnit,
-            purchangeRate: productDetail.purchangeRate,
+            purchaseRate: productDetail.purchaseRate,
         })
         updateLocalStorage(state.vendorData);
         toast.success("New Product Added! 😊") 
@@ -107,7 +107,7 @@ export default createStore({
                 product.stock= productDetail.stock;
                 product.order= productDetail.order;
                 product.productUnit= productDetail.productUnit;
-                product.purchangeRate= productDetail.purchangeRate;
+                product.purchaseRate= productDetail.purchaseRate;
             }
         }
         updateLocalStorage(state.vendorData);
@@ -172,7 +172,7 @@ export default createStore({
       );
       const newProductName = Array.from(new Set(state.productName));
       console.log("newProductName: ", newProductName);
-      return uniqueProductNames.concat(newProductName);
+      return uniqueProductNames.concat(newProductName).filter(Boolean);
   },
     getAllVendors: state => state.vendorData
   }

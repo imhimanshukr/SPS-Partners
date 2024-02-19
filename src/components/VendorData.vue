@@ -1,5 +1,5 @@
 <template>
-  <v-container style="position: relative;">
+  <v-container>
     <v-text-field
       placeholder="Search Vendor"
       variant="solo-filled"
@@ -18,8 +18,10 @@
         <v-expansion-panel-title expand-icon="mdi-menu-down">
           <div class="d-flex justify-space-between align-center w-100">
             <p class="font-weight-medium text-uppercase">
-              {{ vendor.vendorName }}<br>
-              <i style="font-size: 10px;">{{vendor.partyDetail.lastBillingDate}}</i>
+              {{ vendor.vendorName }}<br />
+              <i style="font-size: 10px">{{
+                vendor.partyDetail.lastBillingDate
+              }}</i>
             </p>
             <div style="min-width: 120px">
               <v-icon
@@ -69,21 +71,28 @@
                   : "No Party name"
               }}
             </v-chip>
-<a :href="'tel:' + (vendor.partyDetail.partyNumber ? vendor.partyDetail.partyNumber : '')">
-  <v-chip
-    size="x-small"
-    variant="flat"
-    color="grey"
-    class="ma-1 font-italic"
-    @click.stop
-  >
-    {{
-      vendor.partyDetail.partyNumber
-        ? vendor.partyDetail.partyNumber
-        : "No Party Number"
-    }}
-  </v-chip>
-</a>
+            <a
+              :href="
+                'tel:' +
+                (vendor.partyDetail.partyNumber
+                  ? vendor.partyDetail.partyNumber
+                  : '')
+              "
+            >
+              <v-chip
+                size="x-small"
+                variant="flat"
+                color="grey"
+                class="ma-1 font-italic"
+                @click.stop
+              >
+                {{
+                  vendor.partyDetail.partyNumber
+                    ? vendor.partyDetail.partyNumber
+                    : "No Party Number"
+                }}
+              </v-chip>
+            </a>
             <v-chip
               size="x-small"
               variant="flat"
@@ -124,52 +133,54 @@
             >
           </v-flex>
 
-          <v-table v-if="vendor.productList.length > 0">
-            <thead>
-              <tr>
-                <th class="text-left" style="width: 50px">S.No</th>
-                <th class="text-left">Product</th>
-                <th class="text-left">Purchange Rate</th>
-                <th class="text-left">Stock</th>
-                <th class="text-left">Order</th>
-                <th class="text-left">Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="(product, index) in vendor.productList" :key="index">
-                <td style="width: 30px">{{ index + 1 }}</td>
-                <td style="text-transform: capitalize;">{{ product.productName }}</td>
-                <td>
-                  {{ product.purchangeRate }}
-                  {{ product.purchangeRate ? product.productUnit : "N/A" }}
-                </td>
-                <td>
-                  {{ product.stock }}
-                  {{ product.stock ? product.productUnit : "N/A" }}
-                </td>
-                <td>
-                  {{ product.order }}
-                  {{ product.order ? product.productUnit : "N/A" }}
-                </td>
-                <td class="d-flex align-center">
-                  <v-icon
-                    class="ml-2 cursor-pointer"
-                    color="blue-darken-2"
-                    @click="openProductDetail(product, vendor.vendorId)"
-                    >mdi-pencil</v-icon
-                  >
-                  <v-icon
-                    class="ml-2 cursor-pointer"
-                    color="red-darken-2"
-                    @click="
-                      openDeleteProductModel(vendor.vendorId, product.productId)
-                    "
-                    >mdi-delete</v-icon
-                  >
-                </td>
-              </tr>
-            </tbody>
-          </v-table>
+<v-table v-if="vendor.productList.length > 0">
+  <thead>
+    <tr>
+      <th class="text-left" style="width: 30px;">S.No</th>
+      <th class="text-left">Product</th>
+      <th class="text-left">Purchase Rate</th>
+      <th class="text-left">Stock</th>
+      <th class="text-left">Order</th>
+      <th class="text-left">Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr v-for="(product, index) in vendor.productList" :key="index">
+      <td>{{ index + 1 }}</td>
+      <td style="text-transform: capitalize;">
+        {{ product.productName }}
+      </td>
+      <td>
+        {{ product.purchaseRate }}
+        {{ product.purchaseRate ? product.productUnit : "N/A" }}
+      </td>
+      <td>
+        {{ product.stock }}
+        {{ product.stock ? product.productUnit : "N/A" }}
+      </td>
+      <td>
+        {{ product.order }}
+        {{ product.order ? product.productUnit : "N/A" }}
+      </td>
+      <td class="d-flex align-center">
+        <v-icon
+          class="ml-2 cursor-pointer"
+          color="blue-darken-2"
+          @click="openProductDetail(product, vendor.vendorId)"
+          >mdi-pencil</v-icon
+        >
+        <v-icon
+          class="ml-2 cursor-pointer"
+          color="red-darken-2"
+          @click="
+            openDeleteProductModel(vendor.vendorId, product.productId)
+          "
+          >mdi-delete</v-icon
+        >
+      </td>
+    </tr>
+  </tbody>
+</v-table>
           <p class="text-center w-100 mt-3 text-grey" v-else>
             No product list available 😢
           </p>
@@ -189,12 +200,22 @@
       <img src="../assets/no-task.webp" width="100%" alt="" />
       <p class="text-center text-grey">No any Vendor Added 😢</p>
     </div>
-    <v-btn
-      color="primary"
-      class="my-2 text-center w-100"
-      @click="$store.dispatch('openAddVendorModal')"
-      >Add Vendor</v-btn
-    >
+    <div>
+      <v-btn
+        density="compact"
+        color="green"
+        icon="mdi-plus"
+        style="text-align: right; position: relative; right: -90%; margin-top:5px;"
+        @click="showAddProdModel = true"
+        v-if="filteredVendorData.length > 0"
+      ></v-btn>
+      <v-btn
+        color="primary"
+        class="my-2 text-center w-100"
+        @click="$store.dispatch('openAddVendorModal')"
+        >Add Vendor</v-btn
+      >
+    </div>
 
     <!-- Add Party Modal -->
     <v-dialog v-model="addPartyModal" max-width="600">
@@ -250,7 +271,7 @@
               :items="$store.getters.productNames"
             ></v-autocomplete>
             <v-text-field
-              v-model="newProductDetail.purchangeRate"
+              v-model="newProductDetail.purchaseRate"
               label="Purchnage Rate"
               type="number"
               variant="solo"
@@ -300,7 +321,7 @@
             ></v-autocomplete>
 
             <v-text-field
-              v-model="editedProduct.purchangeRate"
+              v-model="editedProduct.purchaseRate"
               label="Purchnage Rate"
               type="number"
               variant="solo"
@@ -403,35 +424,38 @@
     <!-- Add Product Name -->
     <v-dialog v-model="showAddProdModel" max-width="600">
       <v-card>
-        <!-- <v-card-title class="headline">Add Vendor</v-card-title> -->
+        <v-card-title class="headline">Add Product Name</v-card-title>
 
         <v-card-text>
           <v-form @submit.prevent="addProductName">
-
             <v-text-field
               v-model="productName"
               label="Enter New Product"
               variant="solo"
-              :rules="[
-                v => !!v || 'Product name is required',
-              ]"
+              :rules="[(v) => !!v || 'Product name is required']"
             ></v-text-field>
 
-            <v-btn type="submit" color="primary" class="w-100">Add Product</v-btn>
+            <v-btn type="submit" color="primary" class="w-100"
+              >Add Product</v-btn
+            >
           </v-form>
         </v-card-text>
 
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn @click="showAddProdModel = false; productName = ''" color="blue darken-1" text>
+          <v-btn
+            @click="
+              showAddProdModel = false;
+              productName = '';
+            "
+            color="blue darken-1"
+            text
+          >
             Close
           </v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
-
-
-    <v-icon color="white" class="add-product-name" @click="showAddProdModel = true;" v-if="filteredVendorData.length > 0">mdi-plus</v-icon>
   </v-container>
 </template>
 
@@ -458,26 +482,26 @@ export default {
     addNewProductModal: false,
     newProductDetail: {
       productId: null,
-      productName: "",
+      productName: null,
       stock: "",
       order: "",
-      purchangeRate: "",
+      purchaseRate: "",
       productUnit: null,
     },
     editProductFormModal: false,
     editedProduct: {
       productId: null,
-      productName: "",
+      productName: null,
       stock: "",
       order: "",
-      purchangeRate: "",
+      purchaseRate: "",
       productUnit: null,
     },
     selectedProductId: null,
     deleteProductAlertModal: false,
     searchVendor: "",
     showAddProdModel: false,
-    productName: ""
+    productName: "",
   }),
   computed: {
     ...mapGetters(["getAllVendors", "productNames"]),
@@ -566,7 +590,7 @@ export default {
         productName: product.productName,
         stock: product.stock,
         order: product.order,
-        purchangeRate: product.purchangeRate,
+        purchaseRate: product.purchaseRate,
         productUnit: product.productUnit,
       };
       this.editProductFormModal = true;
@@ -620,7 +644,7 @@ export default {
 
       const logoImg = new Image();
       logoImg.src = logo;
-      pdf.addImage(logoImg, 'PNG', 0, 0, 30, 30);
+      pdf.addImage(logoImg, "PNG", 0, 0, 30, 30);
       pdf.setFontSize(20);
       pdf.setTextColor(40);
       const vendorName =
@@ -631,7 +655,9 @@ export default {
       const x = (pdf.internal.pageSize.width - textWidth) / 2;
       pdf.text(vendorName, x, y);
       y += 10;
-      const lastBillingDate = this.formatDate(vendorData.partyDetail.lastBillingDate);
+      const lastBillingDate = this.formatDate(
+        vendorData.partyDetail.lastBillingDate
+      );
       pdf.setFontSize(12);
       const partyDetails = [
         {
@@ -648,8 +674,7 @@ export default {
         },
         {
           label: "Last Billing Date:",
-          value:
-            lastBillingDate || "No Last Billing Date",
+          value: lastBillingDate || "No Last Billing Date",
         },
       ];
       partyDetails.forEach((detail) => {
@@ -659,11 +684,19 @@ export default {
 
       const productList = vendorData.productList;
       if (productList.length > 0) {
-        const columns = ["S.No", "Purchange Rate", "Product Name", "Stock", "Order"];
+        const columns = [
+          "S.No",
+          "Purchange Rate",
+          "Product Name",
+          "Stock",
+          "Order",
+        ];
         const rows = productList.map((product, index) => [
           index + 1,
           product.productName,
-          product.purchangeRate ? product.purchangeRate + " " + product.productUnit : "N/A",
+          product.purchaseRate
+            ? product.purchaseRate + " " + product.productUnit
+            : "N/A",
           product.stock ? product.stock + " " + product.productUnit : "N/A",
           product.order ? product.order + " " + product.productUnit : "N/A",
         ]);
@@ -749,22 +782,22 @@ export default {
       const year = date.getFullYear();
       return `${day}-${month}-${year}`;
     },
-    addProductName(){
-      if(this.productName){
-        this.$store.dispatch('addProductName', this.productName);
-      this.showAddProdModel = false;
+    addProductName() {
+      if (this.productName) {
+        this.$store.dispatch("addProductName", this.productName);
+        this.showAddProdModel = false;
+        this.productName = "";
       }
-    }
+    },
   },
 };
 </script>
 
 <style scoped>
 .scroll-vendor {
-    max-height: 60vh;
-    overflow-y: scroll;
-    margin-bottom: 30px;
-    }
+  max-height: 60vh;
+  overflow-y: scroll;
+}
 .v-expansion-panel-title {
   padding: 16px 10px !important;
 }
@@ -773,12 +806,12 @@ td {
   white-space: nowrap;
 }
 .add-product-name {
-      position: absolute;
-    bottom: 12%;
-    right: 5%;
-    background: green;
-    border-radius: 30px;
-    padding: 15px;
-    z-index: 1;
+  position: absolute;
+  bottom: 12%;
+  right: 5%;
+  background: green;
+  border-radius: 30px;
+  padding: 15px;
+  z-index: 1;
 }
 </style>
