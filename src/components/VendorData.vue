@@ -1,13 +1,13 @@
 <template>
   <v-container class="pt-2">
-    <v-tabs
+    <!-- <v-tabs
       v-model="tab"
     >
       <v-tab value="one">Vendor</v-tab>
       <v-tab value="two">Bill</v-tab>
     </v-tabs>
     <v-window v-model="tab">
-        <v-window-item value="one">
+        <v-window-item value="one"> -->
     <v-text-field
       placeholder="Search Vendor"
       variant="solo-filled"
@@ -28,40 +28,43 @@
           <div class="d-flex justify-space-between align-center w-100">
             <p class="font-weight-medium text-uppercase">
               {{ vendor.vendorName }}<br />
-              <i style="font-size: 10px; color: gray;">{{
+              <i style="font-size: 10px; color: gray">{{
                 formatDate(vendor.partyDetail.lastBillingDate)
               }}</i>
             </p>
             <div style="min-width: 120px">
               <v-icon
                 @click="copyVendorData(vendor)"
-                color="blue-grey-lighten-1"
-                class="mr-2"
-                >mdi-content-copy</v-icon
+                color="#660000"
+                >mdi-content-duplicate</v-icon
               >
               <!-- <v-icon @click="share(vendor)" color="deep-purple-lighten-1" class="mx-2">mdi-share</v-icon> -->
               <v-icon
-                color="light-green-darken-4"
-                @click="downloadVendorData(vendor)"
-                >mdi-download</v-icon
-              >
-              <v-icon
-                color="blue"
-                class="mx-2"
+                color="#1c4966"
+                class="mx-1"
                 @click="
                   showEditVendorModal = true;
                   selectedVendorId = vendor.vendorId;
                   editedVendorName = vendor.vendorName;
                 "
-                >mdi-pencil</v-icon
+                >mdi-pencil-box</v-icon
               >
               <v-icon
-                color="red"
+                color="#B71C1C"
                 @click="
                   deleteAlertModal = true;
                   selectedVendorId = vendor.vendorId;
                 "
-                >mdi-delete</v-icon
+                >mdi-trash-can</v-icon
+              >
+              <v-icon
+                color="light-green-darken-4"
+                @click="downloadVendorData(vendor, 'vendor')"
+                class="mx-1"
+                >mdi-folder-download</v-icon
+              >
+              <v-icon color="purple" @click="downloadVendorData(vendor, 'bill')"
+                >mdi-content-save</v-icon
               >
             </div>
           </div>
@@ -142,54 +145,59 @@
             >
           </v-flex>
 
-<v-table v-if="vendor.productList.length > 0" height="300px" fixed-header :hover=true>
-  <thead>
-    <tr>
-      <th class="text-left" style="width: 30px;">S.No</th>
-      <th class="text-left">Product</th>
-      <th class="text-left">Purchase Rate</th>
-      <th class="text-left">Stock</th>
-      <th class="text-left">Order</th>
-      <th class="text-left">Action</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr v-for="(product, index) in vendor.productList" :key="index">
-      <td>{{ index + 1 }}</td>
-      <td style="text-transform: capitalize;">
-        {{ product.productName }}
-      </td>
-      <td>
-        {{ product.purchaseRate }}
-        {{ product.purchaseRate ? product.productUnit : "N/A" }}
-      </td>
-      <td>
-        {{ product.stock }}
-        {{ product.stock ? product.productUnit : "N/A" }}
-      </td>
-      <td>
-        {{ product.order }}
-        {{ product.order ? product.productUnit : "N/A" }}
-      </td>
-      <td class="d-flex align-center">
-        <v-icon
-          class="ml-2 cursor-pointer"
-          color="blue-darken-2"
-          @click="openProductDetail(product, vendor.vendorId)"
-          >mdi-pencil</v-icon
-        >
-        <v-icon
-          class="ml-2 cursor-pointer"
-          color="red-darken-2"
-          @click="
-            openDeleteProductModel(vendor.vendorId, product.productId)
-          "
-          >mdi-delete</v-icon
-        >
-      </td>
-    </tr>
-  </tbody>
-</v-table>
+          <v-table
+            v-if="vendor.productList.length > 0"
+            height="300px"
+            fixed-header
+            :hover="true"
+          >
+            <thead>
+              <tr>
+                <th class="text-left" style="width: 30px">S.No</th>
+                <th class="text-left">Product</th>
+                <th class="text-left">Purchase Rate</th>
+                <th class="text-left">Stock</th>
+                <th class="text-left">Order</th>
+                <th class="text-left">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="(product, index) in vendor.productList" :key="index">
+                <td>{{ index + 1 }}</td>
+                <td style="text-transform: capitalize">
+                  {{ product.productName }}
+                </td>
+                <td>
+                  {{ product.purchaseRate }}
+                  {{ product.purchaseRate ? product.productUnit : "N/A" }}
+                </td>
+                <td>
+                  {{ product.stock }}
+                  {{ product.stock ? product.productUnit : "N/A" }}
+                </td>
+                <td>
+                  {{ product.order }}
+                  {{ product.order ? product.productUnit : "N/A" }}
+                </td>
+                <td class="d-flex align-center">
+                  <v-icon
+                    class="ml-2 cursor-pointer"
+                    color="blue-darken-2"
+                    @click="openProductDetail(product, vendor.vendorId)"
+                    >mdi-pencil</v-icon
+                  >
+                  <v-icon
+                    class="ml-2 cursor-pointer"
+                    color="red-darken-2"
+                    @click="
+                      openDeleteProductModel(vendor.vendorId, product.productId)
+                    "
+                    >mdi-delete</v-icon
+                  >
+                </td>
+              </tr>
+            </tbody>
+          </v-table>
           <p class="text-center w-100 mt-3 text-grey" v-else>
             No product list available 😢
           </p>
@@ -214,7 +222,12 @@
         density="compact"
         color="green"
         icon="mdi-plus"
-        style="text-align: right; position: relative; right: -90%; margin-top:5px;"
+        style="
+          text-align: right;
+          position: relative;
+          right: -90%;
+          margin-top: 5px;
+        "
         @click="showAddProdModel = true"
         v-if="filteredVendorData.length > 0"
       ></v-btn>
@@ -278,7 +291,7 @@
               v-model="newProductDetail.productName"
               variant="solo"
               :items="$store.getters.productNames"
-              no-data-text='Not available, please add!'
+              no-data-text="Not available, please add!"
             ></v-autocomplete>
             <v-text-field
               v-model="newProductDetail.purchaseRate"
@@ -328,7 +341,7 @@
               v-model="editedProduct.productName"
               variant="solo"
               :items="$store.getters.productNames"
-              no-data-text='Not available, please add!'
+              no-data-text="Not available, please add!"
             ></v-autocomplete>
 
             <v-text-field
@@ -467,11 +480,11 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
-    </v-window-item>
+    <!-- </v-window-item>
     <v-window-item value="two">
           Coming Soon ... ✌️
         </v-window-item>
-    </v-window>
+    </v-window> -->
   </v-container>
 </template>
 
@@ -655,95 +668,112 @@ export default {
       this.$store.dispatch("deleteVendor", this.selectedVendorId);
       this.deleteAlertModal = false;
     },
-downloadVendorData(vendorData) {
-  const pdf = new jsPDF();
-  let y = 20;
+    downloadVendorData(vendorData, status) {
+      const pdf = new jsPDF();
+      let y = 20;
 
-  const logoImg = new Image();
-  logoImg.src = logo;
-  pdf.addImage(logoImg, "PNG", 7, 0, 30, 30);
+      const logoImg = new Image();
+      logoImg.src = logo;
+      pdf.addImage(logoImg, "PNG", 7, 0, 30, 30);
 
-  pdf.setFontSize(20);
-  const vendorName =
-    vendorData.vendorName.toUpperCase() || "No Vendor Name";
-  const textWidth =
-    (pdf.getStringUnitWidth(vendorName) * pdf.internal.getFontSize()) /
-    pdf.internal.scaleFactor;
-  const x = (pdf.internal.pageSize.width - textWidth) / 2;
-  pdf.setFont("helvetica", "bold");
-  pdf.setTextColor("#B71C1C");
-  pdf.text(vendorName, x, y);
-  y += 6;
+      const vendorName = (
+        vendorData.vendorName || "No Vendor Name"
+      ).toUpperCase();
+      const textWidth =
+        (pdf.getStringUnitWidth(vendorName) * pdf.internal.getFontSize()) /
+        pdf.internal.scaleFactor;
+      const x = (pdf.internal.pageSize.width - textWidth) / 2;
+      pdf.setFont("helvetica", "bold");
+      pdf.setTextColor("#B71C1C");
+      pdf.setFontSize(20);
+      pdf.text(vendorName, x, y);
+      y += 6;
 
-  // Add mobile number and address
-  const mobileNumber = "9065404033";
-  const address = "Thathopur, Baheri";
-  pdf.setFontSize(8);
-  pdf.setTextColor('#616161');
-  pdf.textWithLink(`${mobileNumber}`, 14, y, {url: `tel:${mobileNumber}`});
-  pdf.text(`${address}`, 14, y + 3);
+      const mobileNumber = "9065404033";
+      const address = "Thathopur, Baheri";
+      pdf.setFontSize(8);
+      pdf.setTextColor("#616161");
+      pdf.textWithLink(mobileNumber, 14, y, { url: `tel:${mobileNumber}` });
+      pdf.text(address, 14, y + 3);
+      const lastBillingDate = this.formatDate(
+        vendorData.partyDetail.lastBillingDate
+      );
 
-  const lastBillingDate = this.formatDate(
-    vendorData.partyDetail.lastBillingDate
-  );
-  pdf.setFontSize(12);
-  const partyDetails = [
-    vendorData.partyDetail.partyName || "No Party Name",
-    vendorData.partyDetail.partyNumber || "No Party Contact",
-    vendorData.partyDetail.partyAddress || "No Party Address",
-    lastBillingDate || "No Last Billing Date",
-  ];
+      if (status !== "bill") {
+        const partyDetails = [
+          vendorData.partyDetail.partyName || "No Party Name",
+          vendorData.partyDetail.partyNumber || "No Party Contact",
+          vendorData.partyDetail.partyAddress || "No Party Address",
+          lastBillingDate || "No Last Billing Date",
+        ];
 
-  // Add party details table
-  const partyDetailColumns = ["Name", "Mobile", "Address", "Last Billing Date"];
-  const partyDetailRows = [partyDetails];
-  pdf.autoTable({ startY: y + 6, head: [partyDetailColumns], body: partyDetailRows });
+        const partyDetailColumns = [
+          "Name",
+          "Mobile",
+          "Address",
+          "Last Billing Date",
+        ];
+        const partyDetailRows = [partyDetails];
+        pdf.setFontSize(12);
+        pdf.autoTable({
+          startY: y + 6,
+          head: [partyDetailColumns],
+          body: partyDetailRows,
+        });
 
-  // Draw red line
-  y = pdf.autoTable.previous.finalY + 5;
-  pdf.setDrawColor('gray'); // Red color
-  pdf.setLineWidth(0.2); // 0.5mm
-  pdf.line(90, y, pdf.internal.pageSize.width - 90, y); // Minimum 40px from both sides
+        y = pdf.autoTable.previous.finalY + 5;
+        pdf.setDrawColor("gray");
+        pdf.setLineWidth(0.2);
+        pdf.line(90, y, pdf.internal.pageSize.width - 90, y);
+        y += 5;
 
-  y += 5; // Adjust space after line
+        const productList = vendorData.productList;
+        if (productList.length > 0) {
+          const columns = [
+            "S.No",
+            "Product Name",
+            "Purchase Rate",
+            "Stock",
+            "Order",
+          ];
+          const rows = productList.map((product, index) => [
+            index + 1,
+            product.productName,
+            product.purchaseRate
+              ? product.purchaseRate + " " + product.productUnit
+              : "N/A",
+            product.stock ? product.stock + " " + product.productUnit : "N/A",
+            product.order ? product.order + " " + product.productUnit : "N/A",
+          ]);
+          pdf.autoTable({ startY: y, head: [columns], body: rows });
+        }
+      } else {
+        const productList = vendorData.productList;
+        if (productList.length > 0) {
+          y += 5;
+          const columns = ["S.No", "Product Name", "Order"];
+          const rows = productList.map((product, index) => [
+            index + 1,
+            product.productName,
+            product.order ? product.order + " " + product.productUnit : "N/A",
+          ]);
+          pdf.autoTable({ startY: y, head: [columns], body: rows });
+        } else {
+          const margin = 10;
+          const text = "No product list available";
+          const textWidth =
+            (pdf.getStringUnitWidth(text) * 30) / pdf.internal.scaleFactor;
+          const x = (pdf.internal.pageSize.width - textWidth) / 2;
+          pdf.setFontSize(30);
+          pdf.setFont("cursive");
+          pdf.setTextColor("#B71C1C");
+          pdf.text(text, x, y + margin * 3);
+        }
+      }
 
-  const productList = vendorData.productList;
-  if (productList.length > 0) {
-    const columns = [
-      "S.No",
-      "Product Name",
-      "Purchase Rate",
-      "Stock",
-      "Order",
-    ];
-    const rows = productList.map((product, index) => [
-      index + 1,
-      product.productName,
-      product.purchaseRate
-        ? product.purchaseRate + " " + product.productUnit
-        : "N/A",
-      product.stock ? product.stock + " " + product.productUnit : "N/A",
-      product.order ? product.order + " " + product.productUnit : "N/A",
-    ]);
-    pdf.autoTable({ startY: y, head: [columns], body: rows });
-  } else {
-    const margin = 10; // Adjust margin value as needed
-    const y = 50; // Initial y-coordinate
-    const text = "No product list available";
-    const textWidth = pdf.getStringUnitWidth(text) * 30 / pdf.internal.scaleFactor; // Width of the text
-    const x = (pdf.internal.pageSize.width - textWidth) / 2; // Calculate x-coordinate for centering text
-    pdf.setFontSize(30);
-    pdf.setFont("cursive");
-    pdf.setTextColor("#B71C1C");
-    pdf.text(text, x, y + margin * 3); // Add margin below
-}
-
-
-  pdf.save(
-    `${vendorData.vendorName} ${lastBillingDate}.pdf`
-  );
-}
- ,   copyVendorData(vendorData) {
+      pdf.save(`${vendorData.vendorName} ${lastBillingDate || ""}.pdf`);
+    },
+    copyVendorData(vendorData) {
       this.$store.dispatch("copyVendor", vendorData);
     },
     // share(vendorData) {
@@ -829,7 +859,7 @@ downloadVendorData(vendorData) {
 
 <style scoped>
 .scroll-vendor {
-  max-height: 60vh;
+  max-height: 65vh;
   overflow-y: scroll;
 }
 .v-expansion-panel-title {

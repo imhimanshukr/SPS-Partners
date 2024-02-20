@@ -17,7 +17,7 @@
             Add Vendor
         </v-btn> -->
         <v-btn
-        color="red"
+        color="#B71C1C"
         variant="flat"
         class="ml-2"
         @click="deleteAllDataModal = true;"
