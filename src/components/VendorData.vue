@@ -696,8 +696,8 @@ downloadVendorData(vendorData) {
   if (productList.length > 0) {
     const columns = [
       "S.No",
-      "Purchase Rate",
       "Product Name",
+      "Purchase Rate",
       "Stock",
       "Order",
     ];
@@ -725,7 +725,7 @@ downloadVendorData(vendorData) {
 
 
   pdf.save(
-    `${vendorData.vendorName}_${vendorData?.partyDetail?.lastBillingDate}.pdf`
+    `${vendorData.vendorName} ${lastBillingDate}.pdf`
   );
 }
  ,   copyVendorData(vendorData) {
