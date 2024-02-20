@@ -8,19 +8,18 @@
 
         <v-spacer></v-spacer>
 
-        <v-btn
+        <!-- <v-btn
         color="blue"
         variant="flat"
         size="x-small"
         @click="$store.dispatch('openAddVendorModal')"
         >
             Add Vendor
-        </v-btn>
+        </v-btn> -->
         <v-btn
         color="red"
         variant="flat"
         class="ml-2"
-        size="x-small"
         @click="deleteAllDataModal = true;"
         >
             Delete All

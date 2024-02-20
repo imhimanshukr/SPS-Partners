@@ -1,5 +1,13 @@
 <template>
-  <v-container>
+  <v-container class="pt-2">
+    <v-tabs
+      v-model="tab"
+    >
+      <v-tab value="one">Vendor</v-tab>
+      <v-tab value="two">Bill</v-tab>
+    </v-tabs>
+    <v-window v-model="tab">
+        <v-window-item value="one">
     <v-text-field
       placeholder="Search Vendor"
       variant="solo-filled"
@@ -9,6 +17,7 @@
       v-model="searchVendor"
       v-if="vendorData?.length > 0"
       class="search-vendor"
+      hide-details
     ></v-text-field>
     <v-expansion-panels v-if="vendorData?.length > 0" class="scroll-vendor">
       <v-expansion-panel
@@ -458,6 +467,11 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+    </v-window-item>
+    <v-window-item value="two">
+          Coming Soon ... ✌️
+        </v-window-item>
+    </v-window>
   </v-container>
 </template>
 
@@ -469,6 +483,7 @@ import logo from "../assets/logo.png";
 
 export default {
   data: () => ({
+    tab: "one",
     deleteAlertModal: false,
     editFormModal: false,
     showEditVendorModal: false,
