@@ -133,7 +133,7 @@
             >
           </v-flex>
 
-<v-table v-if="vendor.productList.length > 0">
+<v-table v-if="vendor.productList.length > 0" height="300px" fixed-header>
   <thead>
     <tr>
       <th class="text-left" style="width: 30px;">S.No</th>
