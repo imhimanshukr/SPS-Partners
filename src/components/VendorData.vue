@@ -646,7 +646,7 @@ downloadVendorData(vendorData) {
 
   const logoImg = new Image();
   logoImg.src = logo;
-  pdf.addImage(logoImg, "PNG", 0, 0, 30, 30);
+  pdf.addImage(logoImg, "PNG", 7, 0, 30, 30);
 
   pdf.setFontSize(20);
   const vendorName =
@@ -665,8 +665,8 @@ downloadVendorData(vendorData) {
   const address = "Thathopur, Baheri";
   pdf.setFontSize(8);
   pdf.setTextColor('#616161');
-  pdf.textWithLink(`${mobileNumber}`, 7, y, {url: `tel:${mobileNumber}`});
-  pdf.text(`${address}`, 7, y + 3);
+  pdf.textWithLink(`${mobileNumber}`, 14, y, {url: `tel:${mobileNumber}`});
+  pdf.text(`${address}`, 14, y + 3);
 
   const lastBillingDate = this.formatDate(
     vendorData.partyDetail.lastBillingDate
