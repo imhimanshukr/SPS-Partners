@@ -89,7 +89,7 @@
                 {{
                   vendor.partyDetail.partyNumber
                     ? vendor.partyDetail.partyNumber
-                    : "No Party Number"
+                    : "No Party Contact"
                 }}
               </v-chip>
             </a>
@@ -231,7 +231,7 @@
             ></v-text-field>
             <v-text-field
               v-model="addParty.partyNumber"
-              label="Party Number"
+              label="Party Contact"
               type="number"
               required
               variant="solo"
@@ -479,7 +479,7 @@ export default {
       partyName: "",
       partyNumber: "",
       partyAddress: "",
-      lastBillingDate: "",
+      lastBillingDate: null,
     },
     addNewProductModal: false,
     newProductDetail: {
@@ -640,78 +640,95 @@ export default {
       this.$store.dispatch("deleteVendor", this.selectedVendorId);
       this.deleteAlertModal = false;
     },
-    downloadVendorData(vendorData) {
-      const pdf = new jsPDF();
-      let y = 20;
+downloadVendorData(vendorData) {
+  const pdf = new jsPDF();
+  let y = 20;
 
-      const logoImg = new Image();
-      logoImg.src = logo;
-      pdf.addImage(logoImg, "PNG", 0, 0, 30, 30);
-      pdf.setFontSize(20);
-      pdf.setTextColor(40);
-      const vendorName =
-        vendorData.vendorName.toUpperCase() || "No Vendor Name";
-      const textWidth =
-        (pdf.getStringUnitWidth(vendorName) * pdf.internal.getFontSize()) /
-        pdf.internal.scaleFactor;
-      const x = (pdf.internal.pageSize.width - textWidth) / 2;
-      pdf.text(vendorName, x, y);
-      y += 10;
-      const lastBillingDate = this.formatDate(
-        vendorData.partyDetail.lastBillingDate
-      );
-      pdf.setFontSize(12);
-      const partyDetails = [
-        {
-          label: "Party Name:",
-          value: vendorData.partyDetail.partyName || "No Party Name",
-        },
-        {
-          label: "Party Number:",
-          value: vendorData.partyDetail.partyNumber || "No Party Number",
-        },
-        {
-          label: "Party Address:",
-          value: vendorData.partyDetail.partyAddress || "No Party Address",
-        },
-        {
-          label: "Last Billing Date:",
-          value: lastBillingDate || "No Last Billing Date",
-        },
-      ];
-      partyDetails.forEach((detail) => {
-        pdf.text(`${detail.label} ${detail.value}`, 10, y);
-        y += 5;
-      });
+  const logoImg = new Image();
+  logoImg.src = logo;
+  pdf.addImage(logoImg, "PNG", 0, 0, 30, 30);
 
-      const productList = vendorData.productList;
-      if (productList.length > 0) {
-        const columns = [
-          "S.No",
-          "Purchange Rate",
-          "Product Name",
-          "Stock",
-          "Order",
-        ];
-        const rows = productList.map((product, index) => [
-          index + 1,
-          product.productName,
-          product.purchaseRate
-            ? product.purchaseRate + " " + product.productUnit
-            : "N/A",
-          product.stock ? product.stock + " " + product.productUnit : "N/A",
-          product.order ? product.order + " " + product.productUnit : "N/A",
-        ]);
-        pdf.autoTable({ startY: y, head: [columns], body: rows });
-      } else {
-        pdf.text("No product list available 😢", 10, y);
-      }
+  pdf.setFontSize(20);
+  const vendorName =
+    vendorData.vendorName.toUpperCase() || "No Vendor Name";
+  const textWidth =
+    (pdf.getStringUnitWidth(vendorName) * pdf.internal.getFontSize()) /
+    pdf.internal.scaleFactor;
+  const x = (pdf.internal.pageSize.width - textWidth) / 2;
+  pdf.setFont("helvetica", "bold");
+  pdf.setTextColor("#B71C1C");
+  pdf.text(vendorName, x, y);
+  y += 6;
 
-      pdf.save(
-        `${vendorData.vendorName}_${vendorData?.partyDetail?.lastBillingDate}.pdf`
-      );
-    },
-    copyVendorData(vendorData) {
+  // Add mobile number and address
+  const mobileNumber = "9065404033";
+  const address = "Thathopur, Baheri";
+  pdf.setFontSize(8);
+  pdf.setTextColor('#616161');
+  pdf.textWithLink(`${mobileNumber}`, 7, y, {url: `tel:${mobileNumber}`});
+  pdf.text(`${address}`, 7, y + 3);
+
+  const lastBillingDate = this.formatDate(
+    vendorData.partyDetail.lastBillingDate
+  );
+  pdf.setFontSize(12);
+  const partyDetails = [
+    vendorData.partyDetail.partyName || "No Party Name",
+    vendorData.partyDetail.partyNumber || "No Party Contact",
+    vendorData.partyDetail.partyAddress || "No Party Address",
+    lastBillingDate || "No Last Billing Date",
+  ];
+
+  // Add party details table
+  const partyDetailColumns = ["Name", "Mobile", "Address", "Last Billing Date"];
+  const partyDetailRows = [partyDetails];
+  pdf.autoTable({ startY: y + 6, head: [partyDetailColumns], body: partyDetailRows });
+
+  // Draw red line
+  y = pdf.autoTable.previous.finalY + 5;
+  pdf.setDrawColor('gray'); // Red color
+  pdf.setLineWidth(0.2); // 0.5mm
+  pdf.line(80, y, pdf.internal.pageSize.width - 80, y); // Minimum 40px from both sides
+
+  y += 5; // Adjust space after line
+
+  const productList = vendorData.productList;
+  if (productList.length > 0) {
+    const columns = [
+      "S.No",
+      "Purchase Rate",
+      "Product Name",
+      "Stock",
+      "Order",
+    ];
+    const rows = productList.map((product, index) => [
+      index + 1,
+      product.productName,
+      product.purchaseRate
+        ? product.purchaseRate + " " + product.productUnit
+        : "N/A",
+      product.stock ? product.stock + " " + product.productUnit : "N/A",
+      product.order ? product.order + " " + product.productUnit : "N/A",
+    ]);
+    pdf.autoTable({ startY: y, head: [columns], body: rows });
+  } else {
+    const margin = 10; // Adjust margin value as needed
+    const y = 50; // Initial y-coordinate
+    const text = "No product list available";
+    const textWidth = pdf.getStringUnitWidth(text) * 30 / pdf.internal.scaleFactor; // Width of the text
+    const x = (pdf.internal.pageSize.width - textWidth) / 2; // Calculate x-coordinate for centering text
+    pdf.setFontSize(30);
+    pdf.setFont("cursive");
+    pdf.setTextColor("#B71C1C");
+    pdf.text(text, x, y + margin * 3); // Add margin below
+}
+
+
+  pdf.save(
+    `${vendorData.vendorName}_${vendorData?.partyDetail?.lastBillingDate}.pdf`
+  );
+}
+ ,   copyVendorData(vendorData) {
       this.$store.dispatch("copyVendor", vendorData);
     },
     // share(vendorData) {
@@ -735,8 +752,8 @@ export default {
     //           value: vendorData.partyDetail.partyName || "No Party Name",
     //         },
     //         {
-    //           label: "Party Number:",
-    //           value: vendorData.partyDetail.partyNumber || "No Party Number",
+    //           label: "Party Contact:",
+    //           value: vendorData.partyDetail.partyNumber || "No Party Contact",
     //         },
     //         {
     //           label: "Party Address:",
