@@ -133,7 +133,7 @@
             >
           </v-flex>
 
-<v-table v-if="vendor.productList.length > 0" height="300px" fixed-header>
+<v-table v-if="vendor.productList.length > 0" height="300px" fixed-header :hover=true>
   <thead>
     <tr>
       <th class="text-left" style="width: 30px;">S.No</th>
@@ -269,6 +269,7 @@
               v-model="newProductDetail.productName"
               variant="solo"
               :items="$store.getters.productNames"
+              no-data-text='Not available, please add!'
             ></v-autocomplete>
             <v-text-field
               v-model="newProductDetail.purchaseRate"
@@ -318,6 +319,7 @@
               v-model="editedProduct.productName"
               variant="solo"
               :items="$store.getters.productNames"
+              no-data-text='Not available, please add!'
             ></v-autocomplete>
 
             <v-text-field
