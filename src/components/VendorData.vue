@@ -688,7 +688,7 @@ downloadVendorData(vendorData) {
   y = pdf.autoTable.previous.finalY + 5;
   pdf.setDrawColor('gray'); // Red color
   pdf.setLineWidth(0.2); // 0.5mm
-  pdf.line(80, y, pdf.internal.pageSize.width - 80, y); // Minimum 40px from both sides
+  pdf.line(90, y, pdf.internal.pageSize.width - 90, y); // Minimum 40px from both sides
 
   y += 5; // Adjust space after line
 
