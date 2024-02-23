@@ -27,15 +27,11 @@
         <v-expansion-panel-title expand-icon="mdi-menu-down">
           <div class="d-flex justify-space-between align-center w-100">
             <p class="font-weight-medium text-uppercase">
-              {{ vendor.vendorName }}<br />
-              <i style="font-size: 10px; color: gray">{{
-                formatDate(vendor.partyDetail.lastBillingDate)
-              }}</i>
-            </p>
+        <span class="truncate-text">{{ vendor.vendorName }}</span><br />
+        <i style="font-size: 10px; color: gray">{{ formatDate(vendor.partyDetail.lastBillingDate) }}</i>
+      </p>
             <div style="min-width: 120px">
-              <v-icon
-                @click="copyVendorData(vendor)"
-                color="#660000"
+              <v-icon @click="copyVendorData(vendor)" color="#660000"
                 >mdi-content-duplicate</v-icon
               >
               <!-- <v-icon @click="share(vendor)" color="deep-purple-lighten-1" class="mx-2">mdi-share</v-icon> -->
@@ -147,7 +143,7 @@
 
           <v-table
             v-if="vendor.productList.length > 0"
-            height="300px"
+            height="200px"
             fixed-header
             :hover="true"
           >
@@ -165,7 +161,10 @@
               <tr v-for="(product, index) in vendor.productList" :key="index">
                 <td>{{ index + 1 }}</td>
                 <td style="text-transform: capitalize">
-                  {{ product.productName }}
+                  {{
+                    product.productName.charAt(0).toUpperCase() +
+                    product.productName.slice(1).toLowerCase()
+                  }}
                 </td>
                 <td>
                   {{ product.purchaseRate }}
@@ -218,19 +217,6 @@
       <p class="text-center text-grey">No any Vendor Added 😢</p>
     </div>
     <div>
-      <v-btn
-        density="compact"
-        color="green"
-        icon="mdi-plus"
-        style="
-          text-align: right;
-          position: relative;
-          right: -90%;
-          margin-top: 5px;
-        "
-        @click="showAddProdModel = true"
-        v-if="filteredVendorData.length > 0"
-      ></v-btn>
       <v-btn
         color="primary"
         class="my-2 text-center w-100"
@@ -286,13 +272,13 @@
         <v-card-title>Add Product</v-card-title>
         <v-card-text>
           <v-form ref="addProductForm" @submit.prevent="addNewProductList">
-            <v-autocomplete
-              label="Product Name"
+            <v-combobox
               v-model="newProductDetail.productName"
+              label="Product Name"
               variant="solo"
               :items="$store.getters.productNames"
               no-data-text="Not available, please add!"
-            ></v-autocomplete>
+            ></v-combobox>
             <v-text-field
               v-model="newProductDetail.purchaseRate"
               label="Purchnage Rate"
@@ -313,16 +299,17 @@
               type="number"
               variant="solo"
             ></v-text-field>
-            <v-radio-group
+            <v-select
               label="Select Unit"
+              :items="['Kg', 'Piece', 'Box', 'Case']"
               v-model="newProductDetail.productUnit"
-            >
-              <div class="d-flex">
-                <v-radio label="Kg" value="Kg" color="green"></v-radio>
-                <v-radio label="Piece" value="PC" color="green"></v-radio>
-                <v-radio label="Case" value="Case" color="green"></v-radio>
-              </div>
-            </v-radio-group>
+              variant="solo"
+            ></v-select>
+            <v-text-field
+              v-model="newProductDetail.productUnit"
+              placeholder="Custom Unit"
+            ></v-text-field>
+
             <v-btn type="submit" color="primary">Save</v-btn>
             <v-btn @click="closeProductForm" class="ml-2">Close</v-btn>
           </v-form>
@@ -336,13 +323,13 @@
         <v-card-title>Edit Product</v-card-title>
         <v-card-text>
           <v-form ref="editProductForm" @submit.prevent="editProductDetail">
-            <v-autocomplete
+            <v-combobox
               label="Product Name"
               v-model="editedProduct.productName"
               variant="solo"
               :items="$store.getters.productNames"
               no-data-text="Not available, please add!"
-            ></v-autocomplete>
+            ></v-combobox>
 
             <v-text-field
               v-model="editedProduct.purchaseRate"
@@ -363,16 +350,16 @@
               type="number"
               variant="solo"
             ></v-text-field>
-            <v-radio-group
+            <v-select
               label="Select Unit"
+              :items="['Kg', 'Piece', 'Box', 'Case']"
               v-model="editedProduct.productUnit"
-            >
-              <div class="d-flex">
-                <v-radio label="Kg" value="Kg" color="green"></v-radio>
-                <v-radio label="Piece" value="PC" color="green"></v-radio>
-                <v-radio label="Case" value="Case" color="green"></v-radio>
-              </div>
-            </v-radio-group>
+              variant="solo"
+            ></v-select>
+            <v-text-field
+              v-model="editedProduct.productUnit"
+              placeholder="Custom Unit"
+            ></v-text-field>
 
             <v-btn type="submit" color="primary" class="mr-2">Edit</v-btn>
             <v-btn @click="closeEditProductForm">Close</v-btn>
@@ -445,41 +432,6 @@
       </v-card>
     </v-dialog>
 
-    <!-- Add Product Name -->
-    <v-dialog v-model="showAddProdModel" max-width="600">
-      <v-card>
-        <v-card-title class="headline">Add Product Name</v-card-title>
-
-        <v-card-text>
-          <v-form @submit.prevent="addProductName">
-            <v-text-field
-              v-model="productName"
-              label="Enter New Product"
-              variant="solo"
-              :rules="[(v) => !!v || 'Product name is required']"
-            ></v-text-field>
-
-            <v-btn type="submit" color="primary" class="w-100"
-              >Add Product</v-btn
-            >
-          </v-form>
-        </v-card-text>
-
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn
-            @click="
-              showAddProdModel = false;
-              productName = '';
-            "
-            color="blue darken-1"
-            text
-          >
-            Close
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
     <!-- </v-window-item>
     <v-window-item value="two">
           Coming Soon ... ✌️
@@ -530,7 +482,6 @@ export default {
     selectedProductId: null,
     deleteProductAlertModal: false,
     searchVendor: "",
-    showAddProdModel: false,
     productName: "",
   }),
   computed: {
@@ -849,7 +800,6 @@ export default {
     addProductName() {
       if (this.productName) {
         this.$store.dispatch("addProductName", this.productName);
-        this.showAddProdModel = false;
         this.productName = "";
       }
     },
@@ -869,13 +819,11 @@ th,
 td {
   white-space: nowrap;
 }
-.add-product-name {
-  position: absolute;
-  bottom: 12%;
-  right: 5%;
-  background: green;
-  border-radius: 30px;
-  padding: 15px;
-  z-index: 1;
+.truncate-text {
+  display: inline-block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 135px;
 }
 </style>

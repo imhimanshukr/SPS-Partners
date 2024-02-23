@@ -12,12 +12,14 @@ const updateLocalStorage = (data) => {
     const data = localStorage.getItem('vendorData');
     return data ? JSON.parse(data) : [];
   };
+//   const capitalizeFirstLetter = (str) => {
+//     return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+// };
 
 export default createStore({
   state: {
     addVendorModel: false,
     vendorData: getLocalStorage(),
-    productName: [],
   },
   mutations: {
     openAddVendorModal(state) {
@@ -166,13 +168,11 @@ export default createStore({
       const uniqueProductNames = Array.from(
           new Set(
               state.vendorData.flatMap(vendor => 
-                  vendor.productList.map(product => product.productName)
+                  vendor.productList.map(product => product.productName.charAt(0).toUpperCase() + product.productName.slice(1).toLowerCase())
               )
           )
       );
-      const newProductName = Array.from(new Set(state.productName));
-      console.log("newProductName: ", newProductName);
-      return uniqueProductNames.concat(newProductName).filter(Boolean);
+      return uniqueProductNames
   },
     getAllVendors: state => state.vendorData
   }
