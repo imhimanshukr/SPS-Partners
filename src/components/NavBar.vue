@@ -3,7 +3,11 @@
         color="teal-lighten-2"
       >
         <img
-        src="../assets/logo.png" width="100px"
+        src="../assets/logo.png" width="100px" style="margin-left: -6px;"
+        />
+        <v-spacer></v-spacer>
+        <img
+        src="../assets/mahadev.png" width="70px" class="ml-14"
         />
 
         <v-spacer></v-spacer>
@@ -19,8 +23,9 @@
         <v-btn
         color="#B71C1C"
         variant="flat"
-        class="ml-2"
+        class="ml-2 pa-2"
         @click="deleteAllDataModal = true;"
+        style="margin-right: 16px;"
         >
             Delete All
         </v-btn>

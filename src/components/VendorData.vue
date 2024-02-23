@@ -16,7 +16,7 @@
       clearable
       v-model="searchVendor"
       v-if="vendorData?.length > 0"
-      class="search-vendor"
+      class="search-vendor mb-1"
       hide-details
     ></v-text-field>
     <v-expansion-panels v-if="vendorData?.length > 0" class="scroll-vendor">
@@ -809,7 +809,7 @@ export default {
 
 <style scoped>
 .scroll-vendor {
-  max-height: 65vh;
+  max-height: 70vh;
   overflow-y: scroll;
 }
 .v-expansion-panel-title {
