@@ -1,37 +1,30 @@
 <template>
-      <v-app-bar
-        color="#ffc923"
-      >
-        <img
-        src="../assets/logo.png" width="100px" style="margin-left: -6px;"
-        />
-        <p class="tagline">आपके ज़रूरतों का साथी ...</p>
-        <v-spacer></v-spacer>
-        <img
-        src="../assets/mahadev.png" width="70px" class="ml-14"
-        />
+  <v-app-bar color="#ffc923">
+    <div class="logo">
+      <img
+        src="../assets/logo.png"
+        class="logo-img"
+        width="100px"
+        style="margin-left: -6px"
+      />
+      <p class="tagline">आपके ज़रूरतों का साथी ...</p>
+    </div>
+    <v-spacer></v-spacer>
+    <img src="../assets/mahadev.png" width="70px" class="ml-14 logo2" />
 
-        <v-spacer></v-spacer>
+    <v-spacer></v-spacer>
 
-        <!-- <v-btn
-        color="blue"
-        variant="flat"
-        size="x-small"
-        @click="$store.dispatch('openAddVendorModal')"
-        >
-            Add Vendor
-        </v-btn> -->
-        <v-btn
-        color="#B71C1C"
-        variant="flat"
-        class="ml-2 pa-2"
-        @click="deleteAllDataModal = true;"
-        style="margin-right: 16px;"
-        >
-            Delete All
-        </v-btn>
+    <v-btn
+      color="#B71C1C"
+      variant="flat"
+      class="ml-2 pa-2 delete-btn"
+      @click="deleteAllDataModal = true"
+      style="margin-right: 16px"
+    >
+      Delete All
+    </v-btn>
 
-            <!-- Delete Product Alert Modal -->
+    <!-- Delete Product Alert Modal -->
     <v-dialog v-model="deleteAllDataModal" max-width="400">
       <v-card>
         <v-card-title>Delete All Data</v-card-title>
@@ -40,35 +33,61 @@
         </v-card-text>
         <v-card-actions>
           <v-btn color="red" @click="deleteAllData">Delete</v-btn>
-          <v-btn @click="deleteAllDataModal = false;">Cancel</v-btn>
+          <v-btn @click="deleteAllDataModal = false">Cancel</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
-      </v-app-bar>
+  </v-app-bar>
 </template>
 
 <script>
-    export default {
-        data: () => ({
-            deleteAllDataModal: false,
-        }),
-        methods: {
-            deleteAllData(){
-                this.$store.state.vendorData = [];
-                localStorage.removeItem('vendorData')
-                this.deleteAllDataModal = false;
-            }
-        },
-    }
+export default {
+  data: () => ({
+    deleteAllDataModal: false,
+  }),
+  methods: {
+    deleteAllData() {
+      this.$store.state.vendorData = [];
+      localStorage.removeItem("vendorData");
+      this.deleteAllDataModal = false;
+    },
+  },
+};
 </script>
 
 <style scoped>
-.tagline{
+.logo {
   position: relative;
-    left: -20px;
-    bottom: -20px;
-    color: #bb1717;
-    font-size: 15px;
-    font-weight: 600;
+}
+.tagline {
+  position: absolute;
+  right: -150px;
+  bottom: 20px;
+  color: #bb1717;
+  font-size: 15px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+@media (max-width: 600px) {
+  .logo-img {
+    width: 75px !important;
+  }
+  .logo2{
+    width: 60px;
+  }
+  .tagline {
+    font-size: 10px;
+        right: -100px;
+  }
+  .delete-btn {
+    padding: 5px !important;
+        font-size: 10px;
+        height: 25px;
+  }
+  .v-app-bar {
+    min-height: 55px !important;
+    height: 55px !important;
+  }
 }
 </style>
