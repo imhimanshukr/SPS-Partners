@@ -1,11 +1,11 @@
 <template>
       <v-app-bar
-        color="teal-lighten-2"
+        color="#ffc923"
       >
         <img
         src="../assets/logo.png" width="100px" style="margin-left: -6px;"
         />
-        <p class="tagline">आपकी ज़रूरतों का साथी</p>
+        <p class="tagline">आपके ज़रूरतों का साथी ...</p>
         <v-spacer></v-spacer>
         <img
         src="../assets/mahadev.png" width="70px" class="ml-14"
@@ -67,7 +67,7 @@
   position: relative;
     left: -20px;
     bottom: -20px;
-    color: #ff0000a6;
+    color: #bb1717;
     font-size: 15px;
     font-weight: 600;
 }
