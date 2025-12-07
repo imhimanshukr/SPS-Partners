@@ -5,6 +5,7 @@
         <img
         src="../assets/logo.png" width="100px" style="margin-left: -6px;"
         />
+        <p class="tagline">आपकी ज़रूरतों का साथी</p>
         <v-spacer></v-spacer>
         <img
         src="../assets/mahadev.png" width="70px" class="ml-14"
@@ -62,5 +63,12 @@
 </script>
 
 <style scoped>
-
+.tagline{
+  position: relative;
+    left: -20px;
+    bottom: -20px;
+    color: #ff0000a6;
+    font-size: 15px;
+    font-weight: 600;
+}
 </style>

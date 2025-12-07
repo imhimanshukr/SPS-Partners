@@ -1,13 +1,5 @@
 <template>
   <v-container class="pt-2">
-    <!-- <v-tabs
-      v-model="tab"
-    >
-      <v-tab value="one">Vendor</v-tab>
-      <v-tab value="two">Bill</v-tab>
-    </v-tabs>
-    <v-window v-model="tab">
-        <v-window-item value="one"> -->
     <v-text-field
       placeholder="Search Vendor"
       variant="solo-filled"
@@ -19,6 +11,7 @@
       class="search-vendor mb-1"
       hide-details
     ></v-text-field>
+
     <v-expansion-panels v-if="vendorData?.length > 0" class="scroll-vendor">
       <v-expansion-panel
         v-for="(vendor, index) in filteredVendorData"
@@ -27,14 +20,18 @@
         <v-expansion-panel-title expand-icon="mdi-menu-down">
           <div class="d-flex justify-space-between align-center w-100">
             <p class="font-weight-medium text-uppercase">
-        <span class="truncate-text">{{ vendor.vendorName }}</span><br />
-        <i style="font-size: 10px; color: gray">{{ formatDate(vendor.partyDetail.lastBillingDate) }}</i>
-      </p>
-            <div style="min-width: 120px">
-              <v-icon @click="copyVendorData(vendor)" color="#660000"
-                >mdi-content-duplicate</v-icon
-              >
-              <!-- <v-icon @click="share(vendor)" color="deep-purple-lighten-1" class="mx-2">mdi-share</v-icon> -->
+              <span class="truncate-text">{{ vendor.vendorName }}</span
+              ><br />
+              <i style="font-size: 10px; color: gray">
+                {{ formatDate(vendor.partyDetail.lastBillingDate) }}
+              </i>
+            </p>
+
+            <div style="min-width: 150px" class="text-right" @click.stop>
+              <v-icon @click="copyVendorData(vendor)" color="#660000">
+                mdi-content-duplicate
+              </v-icon>
+
               <v-icon
                 color="#1c4966"
                 class="mx-1"
@@ -43,28 +40,47 @@
                   selectedVendorId = vendor.vendorId;
                   editedVendorName = vendor.vendorName;
                 "
-                >mdi-pencil-box</v-icon
               >
+                mdi-pencil-box
+              </v-icon>
+
               <v-icon
                 color="#B71C1C"
                 @click="
                   deleteAlertModal = true;
                   selectedVendorId = vendor.vendorId;
                 "
-                >mdi-trash-can</v-icon
               >
+                mdi-trash-can
+              </v-icon>
+
               <v-icon
                 color="light-green-darken-4"
                 @click="downloadVendorData(vendor, 'vendor')"
                 class="mx-1"
-                >mdi-folder-download</v-icon
               >
-              <v-icon color="purple" @click="downloadVendorData(vendor, 'bill')"
-                >mdi-content-save</v-icon
+                mdi-folder-download
+              </v-icon>
+
+              <v-icon
+                color="purple"
+                @click="downloadVendorData(vendor, 'bill')"
               >
+                mdi-content-save
+              </v-icon>
+
+              <!-- 🧾 EPOS-only PDF (3-column) -->
+              <v-icon
+                color="teal-darken-2"
+                class="ml-1"
+                @click="downloadVendorDataEpos(vendor)"
+              >
+                mdi-printer-pos
+              </v-icon>
             </div>
           </div>
         </v-expansion-panel-title>
+
         <v-expansion-panel-text>
           <v-flex>
             <v-chip
@@ -79,6 +95,7 @@
                   : "No Party name"
               }}
             </v-chip>
+
             <a
               :href="
                 'tel:' +
@@ -101,6 +118,7 @@
                 }}
               </v-chip>
             </a>
+
             <v-chip
               size="x-small"
               variant="flat"
@@ -113,6 +131,7 @@
                   : "No Party Address"
               }}
             </v-chip>
+
             <v-chip
               size="x-small"
               variant="flat"
@@ -125,20 +144,22 @@
                   : "No Last Billing Date"
               }}
             </v-chip>
+
             <v-btn
               size="x-small"
               color="blue-accent-2"
               class="text-white"
               @click="openPartyModel(vendor.vendorId, vendor.partyDetail)"
-              >{{
+            >
+              {{
                 vendor.partyDetail.partyName ||
                 vendor.partyDetail.partyName ||
                 vendor.partyDetail.partyName ||
                 vendor.partyDetail.partyName
                   ? "Edit Party Details"
                   : "Add Party Details"
-              }}</v-btn
-            >
+              }}
+            </v-btn>
           </v-flex>
 
           <v-table
@@ -168,38 +189,42 @@
                 </td>
                 <td>
                   {{ product.purchaseRate }}
-                  {{ product.purchaseRate ? product.productUnit : "N/A" }}
+                  {{ product.purchaseRate ? product.productUnit : "" }}
                 </td>
                 <td>
                   {{ product.stock }}
-                  {{ product.stock ? product.productUnit : "N/A" }}
+                  {{ product.stock ? product.productUnit : "" }}
                 </td>
                 <td>
                   {{ product.order }}
-                  {{ product.order ? product.productUnit : "N/A" }}
+                  {{ product.order ? product.productUnit : "" }}
                 </td>
                 <td class="d-flex align-center">
                   <v-icon
                     class="ml-2 cursor-pointer"
                     color="blue-darken-2"
                     @click="openProductDetail(product, vendor.vendorId)"
-                    >mdi-pencil</v-icon
                   >
+                    mdi-pencil
+                  </v-icon>
                   <v-icon
                     class="ml-2 cursor-pointer"
                     color="red-darken-2"
                     @click="
                       openDeleteProductModel(vendor.vendorId, product.productId)
                     "
-                    >mdi-delete</v-icon
                   >
+                    mdi-delete
+                  </v-icon>
                 </td>
               </tr>
             </tbody>
           </v-table>
+
           <p class="text-center w-100 mt-3 text-grey" v-else>
             No product list available 😢
           </p>
+
           <v-btn
             color="blue-lighten-1 text-white"
             class="my-2 text-center w-100"
@@ -207,22 +232,26 @@
               addNewProductModal = true;
               selectedVendorId = vendor.vendorId;
             "
-            >Add Product</v-btn
           >
+            Add Product
+          </v-btn>
         </v-expansion-panel-text>
       </v-expansion-panel>
     </v-expansion-panels>
+
     <div v-else>
       <img src="../assets/no-task.webp" width="100%" alt="" />
       <p class="text-center text-grey">No any Vendor Added 😢</p>
     </div>
+
     <div>
       <v-btn
         color="primary"
         class="my-2 text-center w-100"
         @click="$store.dispatch('openAddVendorModal')"
-        >Add Vendor</v-btn
       >
+        Add Vendor
+      </v-btn>
     </div>
 
     <!-- Add Party Modal -->
@@ -237,6 +266,7 @@
               required
               variant="solo"
             ></v-text-field>
+
             <v-text-field
               v-model="addParty.partyNumber"
               label="Party Contact"
@@ -245,12 +275,14 @@
               variant="solo"
               :maxlength="10"
             ></v-text-field>
+
             <v-text-field
               v-model="addParty.partyAddress"
               label="Party Address"
               required
               variant="solo"
             ></v-text-field>
+
             <v-text-field
               v-model="addParty.lastBillingDate"
               label="Last Billling Date"
@@ -259,6 +291,7 @@
               variant="solo"
               format="DD-MM-YYY"
             ></v-text-field>
+
             <v-btn type="submit" color="primary">Save</v-btn>
             <v-btn @click="closePartyForm" class="ml-2">Close</v-btn>
           </v-form>
@@ -279,6 +312,7 @@
               :items="$store.getters.productNames"
               no-data-text="Not available, please add!"
             ></v-combobox>
+
             <v-text-field
               v-model="newProductDetail.purchaseRate"
               label="Purchnage Rate"
@@ -286,6 +320,7 @@
               variant="solo"
               required
             ></v-text-field>
+
             <v-text-field
               v-model="newProductDetail.stock"
               label="Stock"
@@ -293,18 +328,21 @@
               variant="solo"
               required
             ></v-text-field>
+
             <v-text-field
               v-model="newProductDetail.order"
               label="Order"
               type="number"
               variant="solo"
             ></v-text-field>
+
             <v-select
               label="Select Unit"
-              :items="['Kg', 'Piece', 'Box', 'Case']"
+              :items="['Kg', 'GM', 'Piece', 'Box', 'Case']"
               v-model="newProductDetail.productUnit"
               variant="solo"
             ></v-select>
+
             <v-text-field
               v-model="newProductDetail.productUnit"
               placeholder="Custom Unit"
@@ -344,24 +382,27 @@
               type="number"
               variant="solo"
             ></v-text-field>
+
             <v-text-field
               v-model="editedProduct.order"
               label="Order"
               type="number"
               variant="solo"
             ></v-text-field>
+
             <v-select
               label="Select Unit"
-              :items="['Kg', 'Piece', 'Box', 'Case']"
+              :items="['Kg','GM', 'Piece', 'Box', 'Case']"
               v-model="editedProduct.productUnit"
               variant="solo"
             ></v-select>
+
             <v-text-field
               v-model="editedProduct.productUnit"
               placeholder="Custom Unit"
             ></v-text-field>
 
-            <v-btn type="submit" color="primary" class="mr-2">Edit</v-btn>
+            <v-btn type="submit" color="primary" class="mr-2"> Edit </v-btn>
             <v-btn @click="closeEditProductForm">Close</v-btn>
           </v-form>
         </v-card-text>
@@ -383,11 +424,13 @@
               selectedVendorId = null;
               selectedProductId = null;
             "
-            >Cancel</v-btn
           >
+            Cancel
+          </v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
+
     <!-- Delete Vendor Alert Modal -->
     <v-dialog v-model="deleteAlertModal" max-width="400">
       <v-card>
@@ -431,12 +474,6 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
-
-    <!-- </v-window-item>
-    <v-window-item value="two">
-          Coming Soon ... ✌️
-        </v-window-item>
-    </v-window> -->
   </v-container>
 </template>
 
@@ -522,41 +559,34 @@ export default {
   methods: {
     openPartyModel(vendorId, partyDetail) {
       this.selectedVendorId = vendorId;
-      (this.addParty = {
+      this.addParty = {
         partyName: partyDetail.partyName,
         partyNumber: partyDetail.partyNumber,
         partyAddress: partyDetail.partyAddress,
         lastBillingDate: partyDetail.lastBillingDate,
-      }),
-        (this.addPartyModal = true);
+      };
+      this.addPartyModal = true;
     },
     addPartyDetail() {
-      // if (this.$refs.addPartyForm.validate()) {
       this.$store.dispatch("addPartyDetail", {
         vendorId: this.selectedVendorId,
         partyDetail: this.addParty,
       });
       this.closePartyForm();
-      // }
     },
     closePartyForm() {
       this.addPartyModal = false;
       this.selectedVendorId = null;
       this.$refs.addPartyForm.reset();
     },
-    editPartyDetail(detail, editPart) {
-      console.log({ detail, editPart });
-    },
 
     addNewProductList() {
-      // if (this.$refs.addProductForm.validate()) {
       this.newProductDetail.productId = new Date().getTime();
       this.$store.dispatch("addNewProduct", {
         vendorId: this.selectedVendorId,
         productDetail: this.newProductDetail,
       });
       this.closeProductForm();
-      // }
     },
     closeProductForm() {
       this.addNewProductModal = false;
@@ -577,27 +607,23 @@ export default {
       this.editProductFormModal = true;
     },
     editProductDetail() {
-      // if (this.$refs.editProductForm.validate()) {
-      // console.log("Save Edit:", this.editedProduct);
       this.$store.dispatch("editProductDetail", {
         vendorId: this.selectedVendorId,
         productDetail: this.editedProduct,
       });
       this.closeEditProductForm();
-      // }
     },
     closeEditProductForm() {
       this.$refs.editProductForm.reset();
       this.editProductFormModal = false;
     },
+
     openDeleteProductModel(vendorId, productId) {
       this.selectedProductId = productId;
       this.selectedVendorId = vendorId;
       this.deleteProductAlertModal = true;
     },
     deleteProduct() {
-      const selectedVendorId = this.selectedVendorId;
-      const selectedProductId = this.selectedProductId;
       const payload = {
         vendorId: this.selectedVendorId,
         productId: this.selectedProductId,
@@ -605,6 +631,7 @@ export default {
       this.$store.dispatch("deleteProduct", payload);
       this.deleteProductAlertModal = false;
     },
+
     editVendorName() {
       if (this.$refs.editedVendorName.validate()) {
         const payload = {
@@ -615,10 +642,13 @@ export default {
         this.showEditVendorModal = false;
       }
     },
+
     deleteVendor() {
       this.$store.dispatch("deleteVendor", this.selectedVendorId);
       this.deleteAlertModal = false;
     },
+
+    // 🔥 PDF download: table bordered + black text
     downloadVendorData(vendorData, status) {
       const pdf = new jsPDF();
       let y = 20;
@@ -635,17 +665,18 @@ export default {
         pdf.internal.scaleFactor;
       const x = (pdf.internal.pageSize.width - textWidth) / 2;
       pdf.setFont("helvetica", "bold");
-      pdf.setTextColor("#B71C1C");
+      pdf.setTextColor(0, 0, 0);
       pdf.setFontSize(20);
       pdf.text(vendorName, x, y);
       y += 6;
 
-      const mobileNumber = "9065404033";
+      const mobileNumber = "7979769612, 8863811908";
       const address = "Thathopur, Baheri";
       pdf.setFontSize(8);
-      pdf.setTextColor("#616161");
+      pdf.setTextColor(0, 0, 0);
       pdf.textWithLink(mobileNumber, 14, y, { url: `tel:${mobileNumber}` });
       pdf.text(address, 14, y + 3);
+
       const lastBillingDate = this.formatDate(
         vendorData.partyDetail.lastBillingDate
       );
@@ -665,15 +696,36 @@ export default {
           "Last Billing Date",
         ];
         const partyDetailRows = [partyDetails];
+
         pdf.setFontSize(12);
+        pdf.setTextColor(0, 0, 0);
+
         pdf.autoTable({
           startY: y + 6,
           head: [partyDetailColumns],
           body: partyDetailRows,
+          theme: "grid",
+          styles: {
+            textColor: [0, 0, 0],
+            lineColor: [0, 0, 0],
+            lineWidth: 0.2,
+            font: "helvetica",
+          },
+          headStyles: {
+            fillColor: [255, 255, 255],
+            textColor: [0, 0, 0],
+            lineColor: [0, 0, 0],
+            lineWidth: 0.2,
+            fontStyle: "bold",
+          },
+          bodyStyles: {
+            fillColor: [255, 255, 255],
+          },
         });
 
         y = pdf.autoTable.previous.finalY + 5;
-        pdf.setDrawColor("gray");
+
+        pdf.setDrawColor(0, 0, 0);
         pdf.setLineWidth(0.2);
         pdf.line(90, y, pdf.internal.pageSize.width - 90, y);
         y += 5;
@@ -692,11 +744,33 @@ export default {
             product.productName,
             product.purchaseRate
               ? product.purchaseRate + " " + product.productUnit
-              : "N/A",
-            product.stock ? product.stock + " " + product.productUnit : "N/A",
-            product.order ? product.order + " " + product.productUnit : "N/A",
+              : "",
+            product.stock ? product.stock + " " + product.productUnit : "",
+            product.order ? product.order + " " + product.productUnit : "",
           ]);
-          pdf.autoTable({ startY: y, head: [columns], body: rows });
+
+          pdf.autoTable({
+            startY: y,
+            head: [columns],
+            body: rows,
+            theme: "grid",
+            styles: {
+              textColor: [0, 0, 0],
+              lineColor: [0, 0, 0],
+              lineWidth: 0.2,
+              font: "helvetica",
+            },
+            headStyles: {
+              fillColor: [255, 255, 255],
+              textColor: [0, 0, 0],
+              lineColor: [0, 0, 0],
+              lineWidth: 0.2,
+              fontStyle: "bold",
+            },
+            bodyStyles: {
+              fillColor: [255, 255, 255],
+            },
+          });
         }
       } else {
         const productList = vendorData.productList;
@@ -706,89 +780,171 @@ export default {
           const rows = productList.map((product, index) => [
             index + 1,
             product.productName,
-            product.order ? product.order + " " + product.productUnit : "N/A",
+            product.order ? product.order + " " + product.productUnit : "",
           ]);
-          pdf.autoTable({ startY: y, head: [columns], body: rows });
+
+          pdf.autoTable({
+            startY: y,
+            head: [columns],
+            body: rows,
+            theme: "grid",
+            styles: {
+              textColor: [0, 0, 0],
+              lineColor: [0, 0, 0],
+              lineWidth: 0.2,
+              font: "helvetica",
+            },
+            headStyles: {
+              fillColor: [255, 255, 255],
+              textColor: [0, 0, 0],
+              lineColor: [0, 0, 0],
+              lineWidth: 0.2,
+              fontStyle: "bold",
+            },
+            bodyStyles: {
+              fillColor: [255, 255, 255],
+            },
+          });
         } else {
           const margin = 10;
           const text = "No product list available";
-          const textWidth =
-            (pdf.getStringUnitWidth(text) * 30) / pdf.internal.scaleFactor;
-          const x = (pdf.internal.pageSize.width - textWidth) / 2;
           pdf.setFontSize(30);
-          pdf.setFont("cursive");
-          pdf.setTextColor("#B71C1C");
-          pdf.text(text, x, y + margin * 3);
+          pdf.setFont("helvetica", "normal");
+          pdf.setTextColor(0, 0, 0);
+          const msgWidth =
+            (pdf.getStringUnitWidth(text) * pdf.internal.getFontSize()) /
+            pdf.internal.scaleFactor;
+          const xCenter = (pdf.internal.pageSize.width - msgWidth) / 2;
+          pdf.text(text, xCenter, y + margin * 3);
         }
       }
 
       pdf.save(`${vendorData.vendorName} ${lastBillingDate || ""}.pdf`);
     },
+
+    // 🧾 EPOS printer-friendly download
+
+downloadVendorDataEpos(vendorData) {
+  const productList = vendorData.productList || [];
+  if (!productList.length) {
+    alert("No products to print for EPOS.");
+    return;
+  }
+
+  const rows = productList.map((product, index) => {
+    const qty = product.order || "";
+    const unit = product.productUnit ? ` ${product.productUnit}` : "";
+    return [
+      index + 1,
+      product.productName,
+      `${qty}${unit}` || "",
+    ];
+  });
+
+  const baseHeight = 45;
+  const rowHeight = 7.5;
+  const minHeight = 90; 
+  const pageHeight = Math.max(minHeight, baseHeight + rows.length * rowHeight);
+
+  const pdf = new jsPDF({
+    orientation: "portrait",
+    unit: "mm",
+    format: [80, pageHeight],
+  });
+
+  const pageWidth = pdf.internal.pageSize.getWidth();
+
+  const logoImg = new Image();
+  logoImg.src = logo;
+  pdf.addImage(logoImg, "PNG", 4, 2, 16, 16);
+
+  const vendorName = (vendorData.vendorName || "").toUpperCase();
+
+  pdf.setFont("helvetica", "bold");
+  pdf.setTextColor(0, 0, 0);
+  pdf.setFontSize(13);
+
+  const vendorTextWidth = pdf.getTextWidth(vendorName);
+  const vendorX = (pageWidth - vendorTextWidth) / 2;
+  pdf.text(vendorName, vendorX, 10);
+
+  const mobile = "7979769612, 8863811908";
+  const address = "Thathopur, Baheri";
+
+  pdf.setFontSize(9);
+  pdf.text(mobile, (pageWidth - pdf.getTextWidth(mobile)) / 2, 15);
+  pdf.text(address, (pageWidth - pdf.getTextWidth(address)) / 2, 19);
+
+  const startY = 25;
+
+  pdf.autoTable({
+    startY,
+    head: [["S.No", "Product", "Quantity"]],
+    body: rows,
+    theme: "grid",
+    margin: { left: 4, right: 4 },
+    styles: {
+      textColor: [0, 0, 0],
+      lineColor: [0, 0, 0],
+      lineWidth: 0.25,
+      font: "helvetica",
+      fontSize: 9,
+      halign: "left",
+      valign: "middle",
+      cellPadding: 1.5,
+      overflow: "linebreak",
+    },
+    headStyles: {
+      fillColor: [255, 255, 255],
+      textColor: [0, 0, 0],
+      lineColor: [0, 0, 0],
+      fontSize: 9,
+      fontStyle: "bold",
+    },
+    bodyStyles: {
+      fillColor: [255, 255, 255],
+    },
+    columnStyles: {
+      0: { cellWidth: 10, halign: "left" },
+      1: { cellWidth: 38, halign: "left" },
+      2: { cellWidth: 22, halign: "left" },
+    },
+  });
+
+  // 🔹 AUTO TABLE END POSITION
+  const finalY = pdf.lastAutoTable.finalY || startY + rows.length * rowHeight;
+
+  // ------------------------------------------
+  // ⭐ FOOTER:
+  // ------------------------------------------
+  const footerText = "SPS - Aapke Zaruraton Ka Saathi";
+  pdf.setFontSize(9);
+  pdf.setFont("helvetica", "bold");
+
+  const footerWidth = pdf.getTextWidth(footerText);
+  const footerX = (pageWidth - footerWidth) / 2;
+
+  // Footer ko bottom me lagao (5mm margin)
+  const footerY = pageHeight - 2;
+
+  pdf.text(footerText, footerX, footerY);
+
+  // ------------------------------------------
+
+  const today = new Date();
+  const day = String(today.getDate()).padStart(2, "0");
+  const month = String(today.getMonth() + 1).padStart(2, "0");
+  const year = today.getFullYear();
+  const todayStr = `${day}-${month}-${year}`;
+
+  pdf.save(`${vendorData.vendorName} ${todayStr}.pdf`);
+},
+
+
     copyVendorData(vendorData) {
       this.$store.dispatch("copyVendor", vendorData);
     },
-    // share(vendorData) {
-    //       const pdf = new jsPDF();
-    //       let y = 20;
-    //       pdf.setFontSize(20);
-    //       pdf.setTextColor(40);
-    //       const vendorName =
-    //         vendorData.vendorName.toUpperCase() || "No Vendor Name";
-    //       const textWidth =
-    //         (pdf.getStringUnitWidth(vendorName) * pdf.internal.getFontSize()) /
-    //         pdf.internal.scaleFactor;
-    //       const x = (pdf.internal.pageSize.width - textWidth) / 2;
-    //       pdf.text(vendorName, x, y);
-    //       y += 10;
 
-    //       pdf.setFontSize(12);
-    //       const partyDetails = [
-    //         {
-    //           label: "Party Name:",
-    //           value: vendorData.partyDetail.partyName || "No Party Name",
-    //         },
-    //         {
-    //           label: "Party Contact:",
-    //           value: vendorData.partyDetail.partyNumber || "No Party Contact",
-    //         },
-    //         {
-    //           label: "Party Address:",
-    //           value: vendorData.partyDetail.partyAddress || "No Party Address",
-    //         },
-    //         {
-    //           label: "Last Billing Date:",
-    //           value:
-    //             vendorData.partyDetail.lastBillingDate || "No Last Billing Date",
-    //         },
-    //       ];
-    //       partyDetails.forEach((detail) => {
-    //         pdf.text(`${detail.label} ${detail.value}`, 10, y);
-    //         y += 5;
-    //       });
-
-    //       const productList = vendorData.productList;
-    //       if (productList.length > 0) {
-    //         const columns = ["S.No", "Product Name", "Stock", "Order"];
-    //         const rows = productList.map((product, index) => [
-    //           index + 1,
-    //           product.productName,
-    //           product.stock + " " + product.productUnit,
-    //           product.order + " " + product.productUnit,
-    //         ]);
-    //         pdf.autoTable({ startY: y, head: [columns], body: rows });
-    //       } else {
-    //         pdf.text("No product list available 😢", 10, y);
-    //       }
-
-    //       const blobURL = pdf.output("blob");
-    // download(blobURL, "vendorData.pdf", "application/pdf");
-    //       // const blobURL = URL.createObjectURL(pdf.output('blob'));
-    //       // const whatsappLink = `https://api.whatsapp.com/send?text=Check out this PDF: ${blobURL}`;
-    //       // window.open(whatsappLink, '_blank');
-    //       const message = "Check out this PDF";
-    //       const whatsappURL = `whatsapp://send?text=${encodeURIComponent(message)}`;
-    //       window.open(whatsappURL);
-    //     },
     formatDate(value) {
       if (!value) return "";
       const date = new Date(value);
