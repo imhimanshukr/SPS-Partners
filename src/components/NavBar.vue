@@ -61,7 +61,7 @@ export default {
 }
 .tagline {
   position: absolute;
-  right: -150px;
+  left: 80%;
   bottom: 20px;
   color: #bb1717;
   font-size: 15px;
@@ -78,7 +78,6 @@ export default {
   }
   .tagline {
     font-size: 10px;
-        right: -100px;
   }
   .delete-btn {
     padding: 5px !important;
