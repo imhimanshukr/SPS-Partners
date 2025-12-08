@@ -1,14 +1,14 @@
-import { createStore } from 'vuex';
-import { useToast } from 'vue-toastification';
+import { createStore } from "vuex";
+import { useToast } from "vue-toastification";
 
 const toast = useToast();
 
 const updateLocalStorage = (data) => {
-  localStorage.setItem('vendorData', JSON.stringify(data));
+  localStorage.setItem("vendorData", JSON.stringify(data));
 };
 
 const getLocalStorage = () => {
-  const data = localStorage.getItem('vendorData');
+  const data = localStorage.getItem("vendorData");
   return data ? JSON.parse(data) : [];
 };
 
@@ -138,6 +138,13 @@ export default createStore({
       state.productName.push(productName);
       toast.success("Product Added! 😊");
     },
+    reorderProducts(state, { vendorId, products }) {
+      const vendor = state.vendorData.find(v => v.vendorId === vendorId);
+      if (vendor) {
+        vendor.productList = products;
+        updateLocalStorage(state.vendorData);
+      }
+    },
   },
   actions: {
     openAddVendorModal({ commit }) {
@@ -173,6 +180,9 @@ export default createStore({
     addProductName({ commit }, payload) {
       commit("addProductName", payload);
     },
+    reorderProducts({ commit }, payload) {
+      commit('reorderProducts', payload);
+    }
   },
   getters: {
     productNames: (state) => {

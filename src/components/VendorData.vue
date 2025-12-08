@@ -164,7 +164,8 @@
           </v-flex>
 
           <div v-if="vendor.productList.length > 0">
-            <v-text-field
+            <div style="display:flex; align-items:center; justify-content:space-between; gap:20px;">
+              <v-text-field
               v-model="productSearchByVendor[vendor.vendorId]"
               placeholder="Search Product"
               variant="solo-filled"
@@ -173,13 +174,12 @@
               clearable
               hide-details
               class="search-vendor mb-2 mt-2"
-            ></v-text-field>
+              ></v-text-field>
 
-            <v-table
-              height="200px"
-              fixed-header
-              :hover="true"
-            >
+              <v-btn size="small" color="blue-lighten-2" @click="isExpand = !isExpand">{{ isExpand ? 'Collapse' : 'Expand'}}</v-btn>
+            </div>
+
+            <v-table :height="isExpand ? '100%' : '200px'" fixed-header :hover="true">
               <thead>
                 <tr>
                   <th class="text-left" style="width: 30px">S.No</th>
@@ -190,70 +190,89 @@
                   <th class="text-left">Action / Select</th>
                 </tr>
               </thead>
-              <tbody>
-                <tr
-                  v-for="(product, index) in getFilteredProducts(vendor)"
-                  :key="product.productId || index"
-                >
-                  <td>{{ index + 1 }}</td>
-                  <td style="text-transform: capitalize">
-                    {{
-                      product.productName.charAt(0).toUpperCase() +
-                      product.productName.slice(1).toLowerCase()
-                    }}
-                  </td>
-                  <td>
-                    {{ product.purchaseRate }}
-                    {{ product.purchaseRate ? product.productUnit : "" }}
-                  </td>
-                  <td>
-                    {{ product.stock }}
-                    {{ product.stock ? product.productUnit : "" }}
-                  </td>
-                  <td>
-                    {{ product.order }}
-                    {{ product.order ? product.productUnit : "" }}
-                  </td>
-                  <td class="d-flex align-center">
-                    <v-icon
-                      class="ml-2 cursor-pointer"
-                      color="blue-darken-2"
-                      @click="openProductDetail(product, vendor.vendorId)"
-                    >
-                      mdi-pencil
-                    </v-icon>
-                    <v-icon
-                      class="ml-2 cursor-pointer"
-                      color="red-darken-2"
-                      @click="
-                        openDeleteProductModel(
-                          vendor.vendorId,
-                          product.productId
-                        )
-                      "
-                    >
-                      mdi-delete
-                    </v-icon>
 
-                    <v-checkbox
-                      class="ml-2"
-                      density="compact"
-                      hide-details
-                      :model-value="
-                        isProductSelected(vendor.vendorId, product.productId)
-                      "
-                      @update:model-value="
-                        toggleProductSelection(
-                          vendor.vendorId,
-                          product.productId,
-                          $event
-                        )
-                      "
-                      @click.stop
-                    ></v-checkbox>
-                  </td>
-                </tr>
-              </tbody>
+              <!-- ✅ DRAGGABLE TBODY -->
+                <draggable
+                  :list="vendor.productList"
+                  item-key="productId"
+                  tag="tbody"
+                  @end="onProductDragEnd(vendor)"
+                >
+                <template #item="{ element: product, index }">
+                  <tr
+                    class="draggable-row"
+                    v-if="matchesProductSearch(vendor.vendorId, product)"
+                    :key="product.productId || index"
+                  >
+                    <td>{{ index + 1 }}</td>
+
+                    <td style="text-transform: capitalize">
+                      {{
+                        product.productName
+                          .charAt(0)
+                          .toUpperCase() +
+                        product.productName.slice(1).toLowerCase()
+                      }}
+                    </td>
+
+                    <td>
+                      {{ product.purchaseRate }}
+                      {{ product.purchaseRate ? product.productUnit : "" }}
+                    </td>
+
+                    <td>
+                      {{ product.stock }}
+                      {{ product.stock ? product.productUnit : "" }}
+                    </td>
+
+                    <td>
+                      {{ product.order }}
+                      {{ product.order ? product.productUnit : "" }}
+                    </td>
+
+                    <td class="d-flex align-center">
+
+                      <v-icon
+                        class="ml-2 cursor-pointer"
+                        color="blue-darken-2"
+                        @click="openProductDetail(product, vendor.vendorId)"
+                      >
+                        mdi-pencil
+                      </v-icon>
+
+                      <v-icon
+                        class="ml-2 cursor-pointer"
+                        color="red-darken-2"
+                        @click="
+                          openDeleteProductModel(
+                            vendor.vendorId,
+                            product.productId
+                          )
+                        "
+                      >
+                        mdi-delete
+                      </v-icon>
+
+                      <v-checkbox
+                        class="ml-2"
+                        density="compact"
+                        hide-details
+                        :model-value="
+                          isProductSelected(vendor.vendorId, product.productId)
+                        "
+                        @update:model-value="
+                          toggleProductSelection(
+                            vendor.vendorId,
+                            product.productId,
+                            $event
+                          )
+                        "
+                        @click.stop
+                      ></v-checkbox>
+                    </td>
+                  </tr>
+                </template>
+              </draggable>
             </v-table>
           </div>
 
@@ -519,8 +538,12 @@ import jsPDF from "jspdf";
 import "jspdf-autotable";
 import logo from "../assets/logo.png";
 import moment from "moment";
+import draggable from "vuedraggable";
 
 export default {
+  components: {
+    draggable,
+  },
   data: () => ({
     tab: "one",
     deleteAlertModal: false,
@@ -558,7 +581,8 @@ export default {
     searchVendor: "",
     productName: "",
     selectedProductsByVendor: {},
-    productSearchByVendor: {}, // ✅ per-vendor product search text
+    productSearchByVendor: {},
+    isExpand: false,
   }),
   computed: {
     ...mapGetters(["getAllVendors", "productNames"]),
@@ -596,18 +620,24 @@ export default {
     },
   },
   methods: {
-    // ✅ filter products per vendor based on search
-    getFilteredProducts(vendor) {
+    // ✅ search filter for each vendor's product
+    matchesProductSearch(vendorId, product) {
       const search =
-        (this.productSearchByVendor[vendor.vendorId] || "")
+        (this.productSearchByVendor[vendorId] || "")
           .trim()
           .toLowerCase();
 
-      if (!search) return vendor.productList;
+      if (!search) return true;
 
-      return vendor.productList.filter((product) =>
-        (product.productName || "").toLowerCase().includes(search)
-      );
+      return (product.productName || "").toLowerCase().includes(search);
+    },
+
+    // ✅ drag end pe Vuex me persist
+    onProductDragEnd(vendor) {
+      this.$store.dispatch("reorderProducts", {
+        vendorId: vendor.vendorId,
+        products: vendor.productList,
+      });
     },
 
     openPartyModel(vendorId, partyDetail) {
@@ -1062,6 +1092,14 @@ th,
 td {
   white-space: nowrap;
 }
+.draggable-row {
+  cursor: grab;
+}
+
+.draggable-row:active {
+  cursor: grabbing;
+}
+
 @media (max-width: 600px) {
   .truncate-text {
     display: inline-block;
