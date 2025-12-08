@@ -20,8 +20,10 @@
         <v-expansion-panel-title expand-icon="mdi-menu-down">
           <div class="d-flex justify-space-between align-center w-100">
             <p class="font-weight-medium text-uppercase">
-              <span class="truncate-text">{{ vendor.vendorName }}</span
-              ><br />
+              <span class="truncate-text">
+                {{ vendor.vendorName }}
+              </span>
+              <br />
               <i style="font-size: 10px; color: gray">
                 {{ formatDate(vendor.partyDetail.lastBillingDate) }}
               </i>
@@ -69,7 +71,6 @@
                 mdi-content-save
               </v-icon>
 
-              <!-- 🧾 EPOS-only PDF (3-column) -->
               <v-icon
                 color="teal-darken-2"
                 class="ml-1"
@@ -162,64 +163,99 @@
             </v-btn>
           </v-flex>
 
-          <v-table
-            v-if="vendor.productList.length > 0"
-            height="200px"
-            fixed-header
-            :hover="true"
-          >
-            <thead>
-              <tr>
-                <th class="text-left" style="width: 30px">S.No</th>
-                <th class="text-left">Product</th>
-                <th class="text-left">Purchase Rate</th>
-                <th class="text-left">Stock</th>
-                <th class="text-left">Order</th>
-                <th class="text-left">Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="(product, index) in vendor.productList" :key="index">
-                <td>{{ index + 1 }}</td>
-                <td style="text-transform: capitalize">
-                  {{
-                    product.productName.charAt(0).toUpperCase() +
-                    product.productName.slice(1).toLowerCase()
-                  }}
-                </td>
-                <td>
-                  {{ product.purchaseRate }}
-                  {{ product.purchaseRate ? product.productUnit : "" }}
-                </td>
-                <td>
-                  {{ product.stock }}
-                  {{ product.stock ? product.productUnit : "" }}
-                </td>
-                <td>
-                  {{ product.order }}
-                  {{ product.order ? product.productUnit : "" }}
-                </td>
-                <td class="d-flex align-center">
-                  <v-icon
-                    class="ml-2 cursor-pointer"
-                    color="blue-darken-2"
-                    @click="openProductDetail(product, vendor.vendorId)"
-                  >
-                    mdi-pencil
-                  </v-icon>
-                  <v-icon
-                    class="ml-2 cursor-pointer"
-                    color="red-darken-2"
-                    @click="
-                      openDeleteProductModel(vendor.vendorId, product.productId)
-                    "
-                  >
-                    mdi-delete
-                  </v-icon>
-                </td>
-              </tr>
-            </tbody>
-          </v-table>
+          <div v-if="vendor.productList.length > 0">
+            <v-text-field
+              v-model="productSearchByVendor[vendor.vendorId]"
+              placeholder="Search Product"
+              variant="solo-filled"
+              dense
+              flat
+              clearable
+              hide-details
+              class="search-vendor mb-2 mt-2"
+            ></v-text-field>
+
+            <v-table
+              height="200px"
+              fixed-header
+              :hover="true"
+            >
+              <thead>
+                <tr>
+                  <th class="text-left" style="width: 30px">S.No</th>
+                  <th class="text-left">Product</th>
+                  <th class="text-left">Purchase Rate</th>
+                  <th class="text-left">Stock</th>
+                  <th class="text-left">Order</th>
+                  <th class="text-left">Action / Select</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr
+                  v-for="(product, index) in getFilteredProducts(vendor)"
+                  :key="product.productId || index"
+                >
+                  <td>{{ index + 1 }}</td>
+                  <td style="text-transform: capitalize">
+                    {{
+                      product.productName.charAt(0).toUpperCase() +
+                      product.productName.slice(1).toLowerCase()
+                    }}
+                  </td>
+                  <td>
+                    {{ product.purchaseRate }}
+                    {{ product.purchaseRate ? product.productUnit : "" }}
+                  </td>
+                  <td>
+                    {{ product.stock }}
+                    {{ product.stock ? product.productUnit : "" }}
+                  </td>
+                  <td>
+                    {{ product.order }}
+                    {{ product.order ? product.productUnit : "" }}
+                  </td>
+                  <td class="d-flex align-center">
+                    <v-icon
+                      class="ml-2 cursor-pointer"
+                      color="blue-darken-2"
+                      @click="openProductDetail(product, vendor.vendorId)"
+                    >
+                      mdi-pencil
+                    </v-icon>
+                    <v-icon
+                      class="ml-2 cursor-pointer"
+                      color="red-darken-2"
+                      @click="
+                        openDeleteProductModel(
+                          vendor.vendorId,
+                          product.productId
+                        )
+                      "
+                    >
+                      mdi-delete
+                    </v-icon>
+
+                    <v-checkbox
+                      class="ml-2"
+                      density="compact"
+                      hide-details
+                      :model-value="
+                        isProductSelected(vendor.vendorId, product.productId)
+                      "
+                      @update:model-value="
+                        toggleProductSelection(
+                          vendor.vendorId,
+                          product.productId,
+                          $event
+                        )
+                      "
+                      @click.stop
+                    ></v-checkbox>
+                  </td>
+                </tr>
+              </tbody>
+            </v-table>
+          </div>
 
           <p class="text-center w-100 mt-3 text-grey" v-else>
             No product list available 😢
@@ -392,7 +428,7 @@
 
             <v-select
               label="Select Unit"
-              :items="['Kg','GM', 'Piece', 'Box', 'Case']"
+              :items="['Kg', 'GM', 'Piece', 'Box', 'Case']"
               v-model="editedProduct.productUnit"
               variant="solo"
             ></v-select>
@@ -482,6 +518,7 @@ import { mapGetters } from "vuex";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
 import logo from "../assets/logo.png";
+import moment from "moment";
 
 export default {
   data: () => ({
@@ -520,6 +557,8 @@ export default {
     deleteProductAlertModal: false,
     searchVendor: "",
     productName: "",
+    selectedProductsByVendor: {},
+    productSearchByVendor: {}, // ✅ per-vendor product search text
   }),
   computed: {
     ...mapGetters(["getAllVendors", "productNames"]),
@@ -557,6 +596,20 @@ export default {
     },
   },
   methods: {
+    // ✅ filter products per vendor based on search
+    getFilteredProducts(vendor) {
+      const search =
+        (this.productSearchByVendor[vendor.vendorId] || "")
+          .trim()
+          .toLowerCase();
+
+      if (!search) return vendor.productList;
+
+      return vendor.productList.filter((product) =>
+        (product.productName || "").toLowerCase().includes(search)
+      );
+    },
+
     openPartyModel(vendorId, partyDetail) {
       this.selectedVendorId = vendorId;
       this.addParty = {
@@ -648,7 +701,6 @@ export default {
       this.deleteAlertModal = false;
     },
 
-    // 🔥 PDF download: table bordered + black text
     downloadVendorData(vendorData, status) {
       const pdf = new jsPDF();
       let y = 20;
@@ -822,127 +874,162 @@ export default {
       pdf.save(`${vendorData.vendorName} ${lastBillingDate || ""}.pdf`);
     },
 
-    // 🧾 EPOS printer-friendly download
+    downloadVendorDataEpos(vendorData) {
+      const productList = vendorData.productList || [];
+      if (!productList.length) {
+        alert("No products to print for EPOS.");
+        return;
+      }
 
-downloadVendorDataEpos(vendorData) {
-  const productList = vendorData.productList || [];
-  if (!productList.length) {
-    alert("No products to print for EPOS.");
-    return;
-  }
+      const rows = productList.map((product, index) => {
+        const qty = product.order || "";
+        const unit = product.productUnit ? ` ${product.productUnit}` : "";
+        return [index + 1, product.productName, `${qty}${unit}` || ""];
+      });
 
-  const rows = productList.map((product, index) => {
-    const qty = product.order || "";
-    const unit = product.productUnit ? ` ${product.productUnit}` : "";
-    return [
-      index + 1,
-      product.productName,
-      `${qty}${unit}` || "",
-    ];
-  });
+      const baseHeight = 45;
+      const rowHeight = 7.5;
+      const minHeight = 90;
+      const pageHeight = Math.max(
+        minHeight,
+        baseHeight + rows.length * rowHeight
+      );
 
-  const baseHeight = 45;
-  const rowHeight = 7.5;
-  const minHeight = 90; 
-  const pageHeight = Math.max(minHeight, baseHeight + rows.length * rowHeight);
+      const pdf = new jsPDF({
+        orientation: "portrait",
+        unit: "mm",
+        format: [80, pageHeight],
+      });
 
-  const pdf = new jsPDF({
-    orientation: "portrait",
-    unit: "mm",
-    format: [80, pageHeight],
-  });
+      const pageWidth = pdf.internal.pageSize.getWidth();
 
-  const pageWidth = pdf.internal.pageSize.getWidth();
+      const logoImg = new Image();
+      logoImg.src = logo;
+      pdf.addImage(logoImg, "PNG", 4, 2, 16, 16);
 
-  const logoImg = new Image();
-  logoImg.src = logo;
-  pdf.addImage(logoImg, "PNG", 4, 2, 16, 16);
+      const vendorName = (vendorData.vendorName || "").toUpperCase();
 
-  const vendorName = (vendorData.vendorName || "").toUpperCase();
+      pdf.setFont("helvetica", "bold");
+      pdf.setTextColor(0, 0, 0);
+      pdf.setFontSize(13);
 
-  pdf.setFont("helvetica", "bold");
-  pdf.setTextColor(0, 0, 0);
-  pdf.setFontSize(13);
+      const vendorTextWidth = pdf.getTextWidth(vendorName);
+      const vendorX = (pageWidth - vendorTextWidth) / 2;
+      pdf.text(vendorName, vendorX, 10);
 
-  const vendorTextWidth = pdf.getTextWidth(vendorName);
-  const vendorX = (pageWidth - vendorTextWidth) / 2;
-  pdf.text(vendorName, vendorX, 10);
+      const mobile = "7979769612, 8863811908";
+      const address = "Thathopur, Baheri";
 
-  const mobile = "7979769612, 8863811908";
-  const address = "Thathopur, Baheri";
+      pdf.setFontSize(9);
+      pdf.text(mobile, (pageWidth - pdf.getTextWidth(mobile)) / 2, 15);
+      pdf.text(address, (pageWidth - pdf.getTextWidth(address)) / 2, 19);
 
-  pdf.setFontSize(9);
-  pdf.text(mobile, (pageWidth - pdf.getTextWidth(mobile)) / 2, 15);
-  pdf.text(address, (pageWidth - pdf.getTextWidth(address)) / 2, 19);
+      const startY = 25;
 
-  const startY = 25;
+      pdf.autoTable({
+        startY,
+        head: [["S.No", "Product", "Quantity"]],
+        body: rows,
+        theme: "grid",
+        margin: { left: 4, right: 4 },
+        styles: {
+          textColor: [0, 0, 0],
+          lineColor: [0, 0, 0],
+          lineWidth: 0.25,
+          font: "helvetica",
+          fontSize: 9,
+          halign: "left",
+          valign: "middle",
+          cellPadding: 1.5,
+          overflow: "linebreak",
+        },
+        headStyles: {
+          fillColor: [255, 255, 255],
+          textColor: [0, 0, 0],
+          lineColor: [0, 0, 0],
+          fontSize: 9,
+          fontStyle: "bold",
+        },
+        bodyStyles: {
+          fillColor: [255, 255, 255],
+        },
+        columnStyles: {
+          0: { cellWidth: 10, halign: "left" },
+          1: { cellWidth: 38, halign: "left" },
+          2: { cellWidth: 22, halign: "left" },
+        },
+      });
 
-  pdf.autoTable({
-    startY,
-    head: [["S.No", "Product", "Quantity"]],
-    body: rows,
-    theme: "grid",
-    margin: { left: 4, right: 4 },
-    styles: {
-      textColor: [0, 0, 0],
-      lineColor: [0, 0, 0],
-      lineWidth: 0.25,
-      font: "helvetica",
-      fontSize: 9,
-      halign: "left",
-      valign: "middle",
-      cellPadding: 1.5,
-      overflow: "linebreak",
+      const footerText = "SPS - Aapke Zaruraton Ka Saathi";
+      pdf.setFontSize(9);
+      pdf.setFont("helvetica", "bold");
+
+      const footerWidth = pdf.getTextWidth(footerText);
+      const footerX = (pageWidth - footerWidth) / 2;
+      const footerY = pageHeight - 2;
+
+      pdf.text(footerText, footerX, footerY);
+
+      const today = new Date();
+      const day = String(today.getDate()).padStart(2, "0");
+      const month = String(today.getMonth() + 1).padStart(2, "0");
+      const year = today.getFullYear();
+      const todayStr = `${day}-${month}-${year}`;
+
+      pdf.save(`${vendorData.vendorName} ${todayStr}.pdf`);
     },
-    headStyles: {
-      fillColor: [255, 255, 255],
-      textColor: [0, 0, 0],
-      lineColor: [0, 0, 0],
-      fontSize: 9,
-      fontStyle: "bold",
-    },
-    bodyStyles: {
-      fillColor: [255, 255, 255],
-    },
-    columnStyles: {
-      0: { cellWidth: 10, halign: "left" },
-      1: { cellWidth: 38, halign: "left" },
-      2: { cellWidth: 22, halign: "left" },
-    },
-  });
-
-  // 🔹 AUTO TABLE END POSITION
-  const finalY = pdf.lastAutoTable.finalY || startY + rows.length * rowHeight;
-
-  // ------------------------------------------
-  // ⭐ FOOTER:
-  // ------------------------------------------
-  const footerText = "SPS - Aapke Zaruraton Ka Saathi";
-  pdf.setFontSize(9);
-  pdf.setFont("helvetica", "bold");
-
-  const footerWidth = pdf.getTextWidth(footerText);
-  const footerX = (pageWidth - footerWidth) / 2;
-
-  // Footer ko bottom me lagao (5mm margin)
-  const footerY = pageHeight - 2;
-
-  pdf.text(footerText, footerX, footerY);
-
-  // ------------------------------------------
-
-  const today = new Date();
-  const day = String(today.getDate()).padStart(2, "0");
-  const month = String(today.getMonth() + 1).padStart(2, "0");
-  const year = today.getFullYear();
-  const todayStr = `${day}-${month}-${year}`;
-
-  pdf.save(`${vendorData.vendorName} ${todayStr}.pdf`);
-},
-
 
     copyVendorData(vendorData) {
-      this.$store.dispatch("copyVendor", vendorData);
+      const selectedIds =
+        this.selectedProductsByVendor[vendorData.vendorId] || [];
+
+      const hasSelection = selectedIds.length > 0;
+
+      const filteredProductList = hasSelection
+        ? vendorData.productList.filter((p) =>
+            selectedIds.includes(p.productId)
+          )
+        : vendorData.productList;
+
+      const newVendorName = `${vendorData.vendorName}-${moment().format(
+        "DD/MM/YY-h:mmA"
+      )}`;
+
+      const payload = {
+        ...vendorData,
+        vendorName: newVendorName,
+        productList: filteredProductList,
+      };
+
+      this.$store.dispatch("copyVendor", payload);
+
+      if (hasSelection) {
+        this.selectedProductsByVendor[vendorData.vendorId] = [];
+      }
+    },
+
+    isProductSelected(vendorId, productId) {
+      const selected = this.selectedProductsByVendor[vendorId];
+      return selected ? selected.includes(productId) : false;
+    },
+
+    toggleProductSelection(vendorId, productId, value) {
+      if (!this.selectedProductsByVendor[vendorId]) {
+        this.selectedProductsByVendor[vendorId] = [];
+      }
+
+      const selected = this.selectedProductsByVendor[vendorId];
+
+      if (value) {
+        if (!selected.includes(productId)) {
+          selected.push(productId);
+        }
+      } else {
+        const index = selected.indexOf(productId);
+        if (index > -1) {
+          selected.splice(index, 1);
+        }
+      }
     },
 
     formatDate(value) {
@@ -975,11 +1062,13 @@ th,
 td {
   white-space: nowrap;
 }
-.truncate-text {
-  display: inline-block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 135px;
+@media (max-width: 600px) {
+  .truncate-text {
+    display: inline-block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 135px;
+  }
 }
 </style>
